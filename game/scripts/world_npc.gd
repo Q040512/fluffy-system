@@ -133,14 +133,39 @@ func _villain_tragic_lines(game) -> Array[String]:
 func _draw() -> void:
 	var bob := sin(anim_time * 1.8) * 3.0
 	var aura := 0.12 + 0.03 * sin(anim_time * 2.6)
+	var robe_color := _get_robe_color()
 	draw_circle(Vector2(0, 24), 13.0, Color(0.75, 0.65, 1.0, aura))
 	draw_circle(Vector2(0, -12 + bob), 10, Color("ead8c0"))
-	draw_rect(Rect2(Vector2(-10, -2 + bob), Vector2(20, 28)), Color("a592d7"))
+	draw_rect(Rect2(Vector2(-10, -2 + bob), Vector2(20, 28)), robe_color)
 	draw_line(Vector2(-12, 14 + bob), Vector2(12, 14 + bob), Color("e8dcff"), 1.5)
+	_draw_role_marker(bob)
 	if favor > 0:
 		draw_circle(Vector2(0, -34 + sin(anim_time * 3.4) * 2.0), 4.0, Color(1.0, 0.78, 0.88, 0.9))
 	draw_string(ThemeDB.fallback_font, Vector2(-40, -36), "%s·%s" % [faction, title], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("c9e8ff"))
 	draw_string(ThemeDB.fallback_font, Vector2(-30, -20), npc_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("f2f7ff"))
+
+func _get_robe_color() -> Color:
+	match personality:
+		"豪迈":
+			return Color("b07a55")
+		"寡言":
+			return Color("6e7a8f")
+		"狡黠":
+			return Color("7f6aa8")
+		_:
+			return Color("7ea07f") if archetype == "mentor" else Color("a592d7")
+
+func _draw_role_marker(bob: float) -> void:
+	match archetype:
+		"mentor", "elder":
+			draw_circle(Vector2(0, -30 + bob), 3.5, Color("ffd77a"))
+		"demon_lord":
+			draw_line(Vector2(-6, -28 + bob), Vector2(6, -20 + bob), Color("ff8fa1"), 2.0)
+			draw_line(Vector2(6, -28 + bob), Vector2(-6, -20 + bob), Color("ff8fa1"), 2.0)
+		"faction_guest":
+			draw_rect(Rect2(Vector2(-4, -29 + bob), Vector2(8, 8)), Color("9de8ff"))
+		_:
+			draw_circle(Vector2(0, -26 + bob), 2.5, Color("c7f0d8"))
 
 func to_save_data() -> Dictionary:
 	return {
