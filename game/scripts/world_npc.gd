@@ -15,11 +15,25 @@ var last_talk_day := -1
 var anim_time := 0.0
 var _home_position := Vector2.ZERO
 var _tragic_revealed := false
+var _routine_points: Array[Vector2] = []
+var _routine_index := 0
+var _facing := Vector2.DOWN
 
 func _ready() -> void:
 	add_to_group("interactable")
 	add_to_group("npc_state")
 	_home_position = position
+	_routine_points = [
+		_home_position + Vector2(0, 0),
+		_home_position + Vector2(0, -28),
+		_home_position + Vector2(24, -28),
+		_home_position + Vector2(24, 0),
+		_home_position + Vector2(24, 28),
+		_home_position + Vector2(0, 28),
+		_home_position + Vector2(-24, 28),
+		_home_position + Vector2(-24, 0),
+		_home_position + Vector2(-24, -28)
+	]
 
 func _process(delta: float) -> void:
 	anim_time += delta
@@ -58,14 +72,25 @@ func _update_routine(delta: float) -> void:
 	if game == null:
 		return
 	var hour := game.get_hour_of_day()
-	var target := _home_position
+	if hour % 3 == 0 and randi() % 10 < 2:
+		_routine_index = (_routine_index + 1) % _routine_points.size()
+	var target := _routine_points[_routine_index]
+	# 不同时段整体偏移，保留“日程感”
 	if hour >= 6 and hour < 11:
-		target = _home_position + morning_offset
+		target += morning_offset
 	elif hour >= 11 and hour < 18:
-		target = _home_position + noon_offset
+		target += noon_offset
 	else:
-		target = _home_position + night_offset
-	position = position.lerp(target, clamp(delta * 1.8, 0.0, 1.0))
+		target += night_offset
+	var delta_vec := target - position
+	if delta_vec.length() > 1.0:
+		_facing = _cardinalize(delta_vec.normalized())
+	position = position.move_toward(target, 28.0 * delta)
+
+func _cardinalize(v: Vector2) -> Vector2:
+	if abs(v.x) > abs(v.y):
+		return Vector2.RIGHT if v.x > 0.0 else Vector2.LEFT
+	return Vector2.DOWN if v.y > 0.0 else Vector2.UP
 
 func _daily_gift() -> Dictionary:
 	match archetype:
@@ -137,6 +162,7 @@ func _draw() -> void:
 	draw_circle(Vector2(0, 24), 13.0, Color(0.75, 0.65, 1.0, aura))
 	draw_circle(Vector2(0, -12 + bob), 10, Color("ead8c0"))
 	draw_rect(Rect2(Vector2(-10, -2 + bob), Vector2(20, 28)), robe_color)
+	draw_line(Vector2(0, 10 + bob), Vector2(0, 10 + bob) + _facing * 8.0, Color("e7f4ff"), 1.6)
 	draw_line(Vector2(-12, 14 + bob), Vector2(12, 14 + bob), Color("e8dcff"), 1.5)
 	_draw_role_marker(bob)
 	if favor > 0:
