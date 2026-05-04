@@ -1,0 +1,10 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'>
+<rect width='1280' height='720' fill='#18262c'/><rect y='120' width='1280' height='600' fill='#27434e'/>
+<text x='40' y='44' fill='white' font-size='30'>日常与突发事件（视觉示意）</text>
+<text x='40' y='80' fill='#d8e8f4' font-size='20'>每天有日常事件，并可能触发突发事件</text>
+<rect x='860' y='20' width='380' height='200' fill='none' stroke='#b9d1e8' stroke-width='2'/>
+<text x='885' y='60' fill='#e7f2ff' font-size='24'>UI消息日志</text>
+<text x='885' y='95' fill='#d3e5f9' font-size='18'>【日常】外门晨课：点名吐纳</text>
+<text x='885' y='125' fill='#d3e5f9' font-size='18'>【突发】夜半失火：抢救仓房</text>
+<text x='885' y='155' fill='#d3e5f9' font-size='18'>【后续】剑帖再现：黑市争夺</text>
+</svg>

@@ -12,6 +12,11 @@ var _dialogue_name: Label
 var _dialogue_text: RichTextLabel
 var _dialogue_prompt: Label
 var _time := 0.0
+var _refresh_accumulator := 0.0
+var _last_stats_text := ""
+var _last_inventory_text := ""
+var _last_message_text := ""
+var _last_hint_text := ""
 var _dialogue_lines: Array[String] = []
 var _dialogue_index := 0
 var _dialogue_title := ""
@@ -78,7 +83,12 @@ func _process(delta: float) -> void:
 	if game == null:
 		return
 	_panel.modulate = Color(1.0, 1.0, 1.0, 0.92 + sin(_time * 1.6) * 0.03)
-	_stats.text = "【洞府】\n%s\n季节：%s  天象：%s\n灵力：%d / %d\n灵石：%d\n境界：%s  修为：%d" % [
+	_dialogue_panel.modulate = Color(1.0, 1.0, 1.0, 0.95 + sin(_time * 2.0) * 0.03)
+	_refresh_accumulator += delta
+	if _refresh_accumulator < 0.12:
+		return
+	_refresh_accumulator = 0.0
+	var stats_text := "【洞府】\n%s\n季节：%s  天象：%s\n灵力：%d / %d\n灵石：%d\n境界：%s  修为：%d" % [
 		game.get_time_label(),
 		game.get_season_name(),
 		game.current_weather,
@@ -88,22 +98,36 @@ func _process(delta: float) -> void:
 		game.get_realm_name(),
 		game.cultivation
 	]
-	_inventory.text = "【背包】\n青灵草籽 x %d\n赤火芝籽 x %d\n青灵草 x %d\n赤火芝 x %d" % [
+	if stats_text != _last_stats_text:
+		_last_stats_text = stats_text
+		_stats.text = stats_text
+
+	var inventory_text := "【背包】\n青灵草籽 x %d\n赤火芝籽 x %d\n青灵草 x %d\n赤火芝 x %d" % [
 		game.inventory.get("青灵草籽", 0),
 		game.inventory.get("赤火芝籽", 0),
 		game.inventory.get("青灵草", 0),
 		game.inventory.get("赤火芝", 0)
 	]
+	if inventory_text != _last_inventory_text:
+		_last_inventory_text = inventory_text
+		_inventory.text = inventory_text
+
 	var spirit_bar_count := int(round((game.spirit / max(game.max_spirit, 1.0)) * 10.0))
 	var spirit_bar := "●".repeat(spirit_bar_count) + "○".repeat(10 - spirit_bar_count)
-	_message.text = "【消息】\n" + "\n".join(message_log)
+	var message_text := "【消息】\n" + "\n".join(message_log)
+	if message_text != _last_message_text:
+		_last_message_text = message_text
+		_message.text = message_text
+
 	var objective := game.get_current_objective_text()
-	_hint.text = "【操作】\n移动：WASD / 方向键\n交互：E / 空格\n打坐：R\n突破：F（%d 灵石）\n灵力潮汐：%s\n当前目标：%s" % [
+	var hint_text := "【操作】\n移动：WASD / 方向键\n交互：E / 空格\n打坐：R\n突破：F（%d 灵石）\n灵力潮汐：%s\n当前目标：%s" % [
 		game.get_breakthrough_cost(),
 		spirit_bar,
 		objective
 	]
-	_dialogue_panel.modulate = Color(1.0, 1.0, 1.0, 0.95 + sin(_time * 2.0) * 0.03)
+	if hint_text != _last_hint_text:
+		_last_hint_text = hint_text
+		_hint.text = hint_text
 
 func push_message(text: String) -> void:
 	message_log.append(text)

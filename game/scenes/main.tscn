@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/environment_fx.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/feedback_layer.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/skeleton_guide.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/adventure_spot.gd" id="10"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1")
@@ -81,6 +82,95 @@ position = Vector2(520, 188)
 script = ExtResource("4")
 npc_name = "青岚师姐"
 
+
+[node name="JuniorBrother" type="Node2D" parent="."]
+position = Vector2(610, 250)
+script = ExtResource("4")
+npc_name = "陆小川师弟"
+title = "外门弟子"
+faction = "青岚宗"
+archetype = "junior"
+
+[node name="Master" type="Node2D" parent="."]
+position = Vector2(560, 110)
+script = ExtResource("4")
+npc_name = "玄尘师父"
+title = "掌峰"
+faction = "青岚宗"
+archetype = "elder"
+
+[node name="UncleMaster" type="Node2D" parent="."]
+position = Vector2(700, 170)
+script = ExtResource("4")
+npc_name = "松鹤师叔"
+title = "巡山长老"
+faction = "青岚宗"
+archetype = "uncle_master"
+
+[node name="DemonLord" type="Node2D" parent="."]
+position = Vector2(770, 330)
+script = ExtResource("4")
+npc_name = "夜魇魔尊"
+title = "魔门之主"
+faction = "幽冥殿"
+archetype = "demon_lord"
+
+[node name="WudangGuest" type="Node2D" parent="."]
+position = Vector2(890, 210)
+script = ExtResource("4")
+npc_name = "清虚道人"
+title = "武当来使"
+faction = "太和武当"
+archetype = "faction_guest"
+
+[node name="EmeiGuest" type="Node2D" parent="."]
+position = Vector2(970, 300)
+script = ExtResource("4")
+npc_name = "静华师太"
+title = "峨眉来使"
+faction = "锦绣峨眉"
+archetype = "faction_guest"
+
+[node name="BeggarGuest" type="Node2D" parent="."]
+position = Vector2(860, 390)
+script = ExtResource("4")
+npc_name = "洪九掌柜"
+title = "丐帮游侠"
+faction = "丐帮"
+archetype = "faction_guest"
+personality = "豪迈"
+hobby = "酿酒"
+
+[node name="TangGuest" type="Node2D" parent="."]
+position = Vector2(760, 250)
+script = ExtResource("4")
+npc_name = "唐镜离"
+title = "蜀中来使"
+faction = "唐门"
+archetype = "faction_guest"
+personality = "狡黠"
+hobby = "机关"
+
+[node name="KunlunGuest" type="Node2D" parent="."]
+position = Vector2(980, 170)
+script = ExtResource("4")
+npc_name = "白长歌"
+title = "昆仑剑修"
+faction = "昆仑"
+archetype = "faction_guest"
+personality = "寡言"
+hobby = "观星"
+
+[node name="MedicineNun" type="Node2D" parent="."]
+position = Vector2(640, 360)
+script = ExtResource("4")
+npc_name = "素问"
+title = "药庐执事"
+faction = "青岚宗"
+archetype = "mentor"
+personality = "严谨"
+hobby = "辨药"
+
 [node name="CliffHerb" type="Node2D" parent="."]
 position = Vector2(130, 300)
 script = ExtResource("5")
@@ -88,6 +178,37 @@ script = ExtResource("5")
 [node name="SkeletonGuide" type="Node2D" parent="."]
 position = Vector2(420, 360)
 script = ExtResource("9")
+
+
+[node name="SpiritSpring" type="Node2D" parent="."]
+position = Vector2(1040, 120)
+script = ExtResource("10")
+spot_name = "听雨潭"
+mode = "spring"
+
+[node name="Arena" type="Node2D" parent="."]
+position = Vector2(1080, 430)
+script = ExtResource("10")
+spot_name = "演武坪"
+mode = "arena"
+
+[node name="AncientRuins" type="Node2D" parent="."]
+position = Vector2(180, 520)
+script = ExtResource("10")
+spot_name = "残碑遗墟"
+mode = "ruins"
+
+[node name="CliffEdge" type="Node2D" parent="."]
+position = Vector2(90, 430)
+script = ExtResource("10")
+spot_name = "断云崖"
+mode = "cliff"
+
+[node name="SecretRealmGate" type="Node2D" parent="."]
+position = Vector2(1180, 220)
+script = ExtResource("10")
+spot_name = "裂隙秘境"
+mode = "secret_realm"
 
 [node name="UI" type="CanvasLayer" parent="."]
 script = ExtResource("6")
