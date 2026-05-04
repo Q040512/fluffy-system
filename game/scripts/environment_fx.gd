@@ -13,11 +13,14 @@ var breakthrough_success := false
 var harvest_bursts: Array[Dictionary] = []
 var thunder_position := Vector2(-1000, -1000)
 var thunder_alpha := 0.0
+var drifting_clouds: Array[Dictionary] = []
 
 func _ready() -> void:
 	z_index = 10
 	for i in PARTICLE_COUNT:
 		particles.append(_make_particle(i))
+	for i in 7:
+		drifting_clouds.append(_make_cloud())
 
 func _process(delta: float) -> void:
 	var game = get_parent()
@@ -32,6 +35,12 @@ func _process(delta: float) -> void:
 		particle["position"] += particle["velocity"] * delta
 		if particle["position"].y > 760.0 or particle["position"].x < -30.0 or particle["position"].x > 1310.0:
 			_reset_particle(particle)
+	for cloud in drifting_clouds:
+		var pos: Vector2 = cloud["position"]
+		pos.x += cloud["speed"] * delta
+		cloud["position"] = pos
+		if pos.x > 1420.0:
+			_reset_cloud(cloud)
 	if sky_flash > 0.0:
 		sky_flash = max(sky_flash - delta * 0.45, 0.0)
 	if breakthrough_alpha > 0.0:
@@ -54,10 +63,19 @@ func _draw() -> void:
 		return
 	var time_ratio := float(game.get_hour_of_day() * 60 + game.get_minute_of_hour()) / (24.0 * 60.0)
 	var daylight := clamp(sin(time_ratio * TAU - PI * 0.5) * 0.5 + 0.5, 0.0, 1.0)
+	var sky_top := Color(0.11, 0.18, 0.27, 1.0).lerp(Color(0.58, 0.72, 0.95, 1.0), daylight)
+	var sky_bottom := Color(0.2, 0.14, 0.25, 1.0).lerp(Color(0.82, 0.88, 0.96, 1.0), daylight)
+	var dawn_glow := max(0.0, 1.0 - abs(time_ratio - 0.25) * 7.0) + max(0.0, 1.0 - abs(time_ratio - 0.75) * 7.0)
+	draw_rect(Rect2(Vector2.ZERO, Vector2(1280, 360)), sky_top)
+	draw_rect(Rect2(Vector2(0, 300), Vector2(1280, 420)), Color(sky_bottom.r, sky_bottom.g, sky_bottom.b, 0.85))
+	if dawn_glow > 0.0:
+		draw_rect(Rect2(Vector2(0, 250), Vector2(1280, 240)), Color(1.0, 0.52, 0.36, dawn_glow * 0.13))
+	_draw_stars(1.0 - daylight)
 	var orb_position := Vector2(160.0 + time_ratio * 920.0, 100.0 + sin(time_ratio * TAU) * 48.0)
 	var orb_color := Color("ffe9a8") if daylight > 0.35 else Color("c9d7ff")
 	draw_circle(orb_position, 30.0, orb_color)
 	draw_circle(orb_position, 46.0, Color(orb_color.r, orb_color.g, orb_color.b, 0.18))
+	_draw_clouds(daylight)
 	_draw_haze(game, daylight)
 	_draw_weather(game)
 	var night_alpha := lerp(0.58, 0.04, daylight)
@@ -90,6 +108,42 @@ func _draw_weather(game) -> void:
 			for index in range(0, particles.size(), 2):
 				var particle: Dictionary = particles[index]
 				draw_circle(particle["position"], particle["radius"], Color(0.75, 0.96, 1.0, 0.32))
+
+func _draw_stars(night_strength: float) -> void:
+	if night_strength <= 0.05:
+		return
+	for i in 20:
+		var x := fmod(float(i * 67), 1260.0) + 12.0
+		var y := 36.0 + fmod(float(i * 41), 220.0)
+		var twinkle := 0.25 + sin(haze_offset * 0.2 + i * 1.3) * 0.2
+		draw_circle(Vector2(x, y), 1.8, Color(0.85, 0.92, 1.0, night_strength * twinkle))
+
+func _draw_clouds(daylight: float) -> void:
+	var alpha_base := lerp(0.14, 0.34, daylight)
+	for cloud in drifting_clouds:
+		var pos: Vector2 = cloud["position"]
+		var size: Vector2 = cloud["size"]
+		var alpha := alpha_base * cloud["alpha"]
+		var puff_color := Color(0.92, 0.96, 1.0, alpha)
+		var center := pos + size * 0.5
+		draw_circle(center + Vector2(-size.x * 0.22, 0), size.y * 0.55, puff_color)
+		draw_circle(center + Vector2(size.x * 0.02, -size.y * 0.1), size.y * 0.62, puff_color)
+		draw_circle(center + Vector2(size.x * 0.26, 0), size.y * 0.5, puff_color)
+		draw_rect(Rect2(center + Vector2(-size.x * 0.34, -size.y * 0.1), Vector2(size.x * 0.68, size.y * 0.44)), puff_color)
+
+func _make_cloud() -> Dictionary:
+	return {
+		"position": Vector2(randf_range(-220.0, 1180.0), randf_range(52.0, 240.0)),
+		"size": Vector2(randf_range(120.0, 250.0), randf_range(28.0, 52.0)),
+		"speed": randf_range(8.0, 20.0),
+		"alpha": randf_range(0.55, 1.0)
+	}
+
+func _reset_cloud(cloud: Dictionary) -> void:
+	cloud["position"] = Vector2(randf_range(-320.0, -120.0), randf_range(52.0, 240.0))
+	cloud["size"] = Vector2(randf_range(120.0, 250.0), randf_range(28.0, 52.0))
+	cloud["speed"] = randf_range(8.0, 20.0)
+	cloud["alpha"] = randf_range(0.55, 1.0)
 
 func _make_particle(seed_offset: int) -> Dictionary:
 	var particle := {
