@@ -1,6 +1,7 @@
 extends Node2D
 
 var anim_time := 0.0
+var ask_count := 0
 
 func _ready() -> void:
 	add_to_group("interactable")
@@ -10,7 +11,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func interact(game) -> void:
-	game.show_skeleton_hint()
+	ask_count += 1
+	game.show_skeleton_qa(ask_count)
 
 func _draw() -> void:
 	var bob := sin(anim_time * 1.7) * 2.0
