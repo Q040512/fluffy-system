@@ -19,6 +19,36 @@ var realm_index := 0
 var cultivation := 0
 var tutorial_stage := 0
 var tutorial_intro_seen := false
+var legend_intro_seen := false
+var main_quest_stage := 0
+var life_origin := "山野遗孤"
+var life_traits := {}
+var reincarnation_count := 0
+var _is_dead := false
+var story_route := "正道守山"
+var joined_faction := "无门无派"
+var story_phase := 0
+var side_story_stage := 0
+var spirit_pearls := {"风灵珠": false, "雷灵珠": false, "水灵珠": false, "火灵珠": false, "土灵珠": false}
+var drunk_timer := 0.0
+var drunk_strength := 0.0
+var unlocked_story_count := 0
+var daily_tasks: Array[Dictionary] = []
+var daily_task_day := 0
+var traversal_mode := "walk" # walk / sword_flight / spirit_mount
+var spirit_npc_attitude := "善待"
+var spirit_npc_relation := 0
+var morality_alignment := "中立" # 好人 / 中立 / 坏人
+var morality_score := 0
+var known_languages := {"中州雅言": true}
+var language_exp := {"中州雅言": 100}
+var human_path := "未定" # 未定 / 学子 / 武夫 / 小贩 / 医师 / 猎户 / 匠人
+var exam_rank := 0
+var spiritual_root := "杂灵根"
+var cultivation_focus := "法修" # 丹修 / 符修 / 体修 / 法修
+var cultivation_paths := {"丹修": 0, "符修": 0, "体修": 0, "法修": 0}
+var martial_art := "太极剑意"
+var immortal_art := "青岚吐纳经"
 var inventory := {
 	"青灵草籽": 6,
 	"赤火芝籽": 4,
@@ -54,6 +84,9 @@ var _farm_tiles: Array = []
 var _daily_reset_nodes: Array = []
 var _interactables: Array = []
 var _has_loaded_save := false
+var _skeleton_check_hour := -1
+var _path_noise_horizontal: Array[Vector2] = []
+var _path_noise_vertical: Array[Vector2] = []
 
 func _ready() -> void:
 	randomize()
@@ -70,11 +103,21 @@ func _ready() -> void:
 		if node.has_method("on_day_started"):
 			node.on_day_started(day)
 	_hour_cursor = get_hour_of_day()
+	if not _has_loaded_save:
+		_roll_life_origin()
+	if not _has_loaded_save and not legend_intro_seen:
+		_show_legend_opening()
 	if not _has_loaded_save and not tutorial_intro_seen:
 		start_skeleton_intro()
+	_build_path_noise_cache()
+	_refresh_daily_tasks()
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	if drunk_timer > 0.0:
+		drunk_timer = max(drunk_timer - delta, 0.0)
+		if drunk_timer == 0.0:
+			drunk_strength = 0.0
 	total_minutes += delta * MINUTES_PER_REAL_SECOND
 	var new_day := int(total_minutes / (24.0 * 60.0)) + 1
 	if new_day != day:
@@ -85,19 +128,156 @@ func _process(delta: float) -> void:
 		_on_hour_changed(_hour_cursor)
 	if is_input_blocked():
 		return
+	if spirit <= 0.0 and not _is_dead:
+		_trigger_death("灵力枯竭，气海崩散。")
+		return
 	if Input.is_action_just_pressed("breakthrough"):
 		attempt_breakthrough()
+	if Input.is_action_just_pressed("free_action"):
+		do_free_action()
+	if Input.is_action_just_pressed("toggle_sword_flight"):
+		toggle_traversal_mode("sword_flight")
+	if Input.is_action_just_pressed("toggle_spirit_mount"):
+		toggle_traversal_mode("spirit_mount")
+	if Input.is_action_just_pressed("toggle_spirit_attitude"):
+		cycle_spirit_attitude()
+	if Input.is_action_just_pressed("toggle_alignment"):
+		cycle_alignment()
+	if Input.is_action_just_pressed("career_action"):
+		try_human_career_action()
+	if Input.is_action_just_pressed("switch_cultivation_focus"):
+		cycle_cultivation_focus()
+	if Input.is_action_just_pressed("practice_path"):
+		practice_cultivation_path()
+	if Input.is_action_just_pressed("switch_martial_art"):
+		cycle_martial_art()
+	if Input.is_action_just_pressed("switch_immortal_art"):
+		cycle_immortal_art()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, Vector2(1280, 720)), Color("15232f"))
-	draw_rect(Rect2(Vector2(0, 120), Vector2(1280, 600)), Color("2b4838"))
-	draw_rect(Rect2(Vector2(160, 140), Vector2(270, 250)), Color("4f3f2c"))
-	draw_rect(Rect2(Vector2(470, 120), Vector2(130, 120)), Color("3b5369"))
-	draw_rect(Rect2(Vector2(470, 240), Vector2(160, 140)), Color("314233"))
+	# 顶部天空
+	draw_rect(Rect2(Vector2.ZERO, Vector2(1280, 140)), Color("15232f"))
+	# 主地表
+	draw_rect(Rect2(Vector2(0, 140), Vector2(1280, 580)), Color("2f5a43"))
+	# 以“地块 + 小路 + 功能区”的方式组织，靠近星露谷式分区结构
+	_draw_tiled_ground(Rect2(Vector2(0, 140), Vector2(1280, 580)), 32, Color("315f47"), Color("2c5842"))
+	# 中央十字小路
+	draw_rect(Rect2(Vector2(610, 140), Vector2(52, 580)), Color("8a7a58"))
+	draw_rect(Rect2(Vector2(0, 402), Vector2(1280, 52)), Color("8a7a58"))
+	_draw_path_noise_cached(_path_noise_horizontal, Color("9b8a62"), Color("7c6d4f"))
+	_draw_path_noise_cached(_path_noise_vertical, Color("9b8a62"), Color("7c6d4f"))
+	# 农田区
+	draw_rect(Rect2(Vector2(150, 170), Vector2(320, 250)), Color("4f3f2c"))
+	_draw_tiled_ground(Rect2(Vector2(160, 180), Vector2(300, 230)), 32, Color("6e573d"), Color("624f36"))
+	_draw_building_block(Rect2(Vector2(170, 186), Vector2(86, 70)), Color("7d5b3f"), "谷仓")
+	_draw_crop_patch(Rect2(Vector2(180, 276), Vector2(90, 56)), Color("5a3f2b"), Color("63bb4e"))
+	_draw_crop_patch(Rect2(Vector2(282, 276), Vector2(90, 56)), Color("5a3f2b"), Color("7ad15b"))
+	_draw_crop_patch(Rect2(Vector2(384, 276), Vector2(62, 56)), Color("5a3f2b"), Color("6fcf88"))
+	# 宗门庭院
+	draw_rect(Rect2(Vector2(470, 160), Vector2(220, 220)), Color("4a5f71"))
+	_draw_tiled_ground(Rect2(Vector2(482, 172), Vector2(196, 196)), 28, Color("566d82"), Color("4c6174"))
+	_draw_building_block(Rect2(Vector2(520, 186), Vector2(120, 96)), Color("5f7b96"), "青岚堂")
+	# 集市/社交区
+	draw_rect(Rect2(Vector2(730, 170), Vector2(280, 200)), Color("4e624f"))
+	_draw_tiled_ground(Rect2(Vector2(742, 182), Vector2(256, 176)), 32, Color("5b715d"), Color("506452"))
+	_draw_building_block(Rect2(Vector2(760, 196), Vector2(96, 74)), Color("7a6a52"), "茶棚")
+	_draw_building_block(Rect2(Vector2(875, 206), Vector2(110, 88)), Color("6b5f49"), "杂货摊")
+	_draw_market_props(Vector2(755, 308))
+	# 水潭
+	draw_rect(Rect2(Vector2(1010, 110), Vector2(180, 130)), Color("2f5877"))
+	_draw_tiled_ground(Rect2(Vector2(1020, 120), Vector2(160, 110)), 20, Color("3d6d90"), Color("376482"))
+	# 遗墟与山道
+	draw_rect(Rect2(Vector2(90, 500), Vector2(220, 140)), Color("4d4658"))
+	draw_rect(Rect2(Vector2(0, 460), Vector2(160, 220)), Color("3a4452"))
+	_draw_building_block(Rect2(Vector2(118, 526), Vector2(120, 88)), Color("5b5266"), "残碑台")
+	# 幽谷与林缘区（风格区分）
+	draw_rect(Rect2(Vector2(1030, 470), Vector2(220, 180)), Color("3f4a34"))
+	_draw_tiled_ground(Rect2(Vector2(1040, 480), Vector2(200, 160)), 26, Color("4d5d40"), Color("445338"))
+	_draw_building_block(Rect2(Vector2(1080, 520), Vector2(120, 90)), Color("4f5b46"), "猎人营地")
+	_draw_fence_line(Vector2(58, 178), Vector2(58, 690), 14, Color("7b5a35"))
+	_draw_fence_line(Vector2(1220, 168), Vector2(1220, 690), 14, Color("7b5a35"))
+	_draw_fence_line(Vector2(80, 684), Vector2(1216, 684), 32, Color("7b5a35"))
+	_draw_tree(Vector2(84, 152), Color("377a33"))
+	_draw_tree(Vector2(1206, 160), Color("3d7d38"))
+	_draw_tree(Vector2(112, 640), Color("3b8a3b"))
+	_draw_tree(Vector2(1160, 640), Color("3f7f42"))
 	draw_string(ThemeDB.fallback_font, Vector2(180, 405), "灵田", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("dce9f3"))
 	draw_string(ThemeDB.fallback_font, Vector2(485, 110), "青岚阁", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("dce9f3"))
 	draw_string(ThemeDB.fallback_font, Vector2(92, 290), "山壁灵草", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("dce9f3"))
 	draw_string(ThemeDB.fallback_font, Vector2(388, 392), "骨祠", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("e7d8ca"))
+	draw_string(ThemeDB.fallback_font, Vector2(1000, 96), "听雨潭", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d7efff"))
+	draw_string(ThemeDB.fallback_font, Vector2(1035, 468), "演武坪", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("f5dec8"))
+	draw_string(ThemeDB.fallback_font, Vector2(146, 556), "残碑遗墟", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("dfd5f4"))
+	draw_string(ThemeDB.fallback_font, Vector2(52, 456), "断云崖", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d6e5f7"))
+	draw_string(ThemeDB.fallback_font, Vector2(1132, 196), "裂隙秘境", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("e2d7ff"))
+	draw_string(ThemeDB.fallback_font, Vector2(1085, 596), "伐木地", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("f2e1c4"))
+	draw_string(ThemeDB.fallback_font, Vector2(232, 656), "掘洞口", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("e6d9c6"))
+	draw_string(ThemeDB.fallback_font, Vector2(322, 536), "刻字石", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d7d3e8"))
+	draw_string(ThemeDB.fallback_font, Vector2(1200, 656), "幽穴入口", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("c9d8ef"))
+	draw_string(ThemeDB.fallback_font, Vector2(980, 694), "神骸古坑", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("f5e4b8"))
+	draw_string(ThemeDB.fallback_font, Vector2(600, 706), "山门入口", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("e9dec8"))
+
+func _build_path_noise_cache() -> void:
+	_path_noise_horizontal = _build_path_noise_points(Rect2(Vector2(0, 402), Vector2(1280, 52)), 26)
+	_path_noise_vertical = _build_path_noise_points(Rect2(Vector2(610, 140), Vector2(52, 580)), 24)
+
+func _build_path_noise_points(area: Rect2, step: int) -> Array[Vector2]:
+	var points: Array[Vector2] = []
+	var rows := int(area.size.y / step) + 1
+	var cols := int(area.size.x / step) + 1
+	for y in rows:
+		for x in cols:
+			var jitter := Vector2((x * 13 + y * 5) % 6 - 3, (x * 7 + y * 11) % 6 - 3)
+			points.append(area.position + Vector2(x * step, y * step) + jitter)
+	return points
+
+func _draw_path_noise_cached(points: Array[Vector2], c1: Color, c2: Color) -> void:
+	for i in points.size():
+		draw_circle(points[i], 2.4, c1 if i % 2 == 0 else c2)
+
+func _draw_tiled_ground(area: Rect2, tile: int, c1: Color, c2: Color) -> void:
+	var rows := int(area.size.y / tile)
+	var cols := int(area.size.x / tile)
+	for y in rows:
+		for x in cols:
+			var color := c1 if (x + y) % 2 == 0 else c2
+			draw_rect(Rect2(area.position + Vector2(x * tile, y * tile), Vector2(tile, tile)), color)
+
+func _draw_building_block(area: Rect2, wall: Color, label: String) -> void:
+	var roof := wall.darkened(0.25)
+	draw_rect(Rect2(area.position + Vector2(0, -12), Vector2(area.size.x, 18)), roof)
+	draw_rect(area, wall)
+	draw_rect(Rect2(area.position + Vector2(area.size.x * 0.42, area.size.y - 24), Vector2(16, 24)), Color("3a2b1f"))
+	draw_string(ThemeDB.fallback_font, area.position + Vector2(6, area.size.y + 16), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("f0e8dc"))
+
+func _draw_crop_patch(area: Rect2, soil: Color, sprout: Color) -> void:
+	draw_rect(area, soil)
+	var cols := int(area.size.x / 18)
+	var rows := int(area.size.y / 18)
+	for y in rows:
+		for x in cols:
+			var p := area.position + Vector2(10 + x * 18, 10 + y * 18)
+			draw_circle(p, 3.0, sprout)
+			draw_circle(p + Vector2(2, -1), 1.6, sprout.lightened(0.25))
+
+func _draw_market_props(base: Vector2) -> void:
+	draw_rect(Rect2(base, Vector2(24, 16)), Color("7f6845"))
+	draw_circle(base + Vector2(38, 8), 8.0, Color("805f3d"))
+	draw_rect(Rect2(base + Vector2(52, 2), Vector2(30, 12)), Color("8d6f49"))
+
+func _draw_fence_line(from_p: Vector2, to_p: Vector2, step: int, color: Color) -> void:
+	draw_line(from_p, to_p, color.darkened(0.22), 2.6)
+	var total := int(from_p.distance_to(to_p))
+	var dir := (to_p - from_p).normalized()
+	for i in range(0, total, step):
+		var p := from_p + dir * i
+		draw_rect(Rect2(p - Vector2(2, 6), Vector2(4, 12)), color)
+
+func _draw_tree(pos: Vector2, leaf: Color) -> void:
+	draw_rect(Rect2(pos + Vector2(-3, 14), Vector2(6, 18)), Color("6e4d2f"))
+	draw_circle(pos, 16.0, leaf)
+	draw_circle(pos + Vector2(-8, 4), 10.0, leaf.darkened(0.1))
+	draw_circle(pos + Vector2(8, 5), 9.0, leaf.lightened(0.08))
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -108,6 +288,16 @@ func _setup_input_map() -> void:
 	_add_key_if_missing("interact", KEY_SPACE)
 	_add_key_if_missing("meditate", KEY_R)
 	_add_key_if_missing("breakthrough", KEY_F)
+	_add_key_if_missing("free_action", KEY_T)
+	_add_key_if_missing("toggle_sword_flight", KEY_Y)
+	_add_key_if_missing("toggle_spirit_mount", KEY_U)
+	_add_key_if_missing("toggle_spirit_attitude", KEY_O)
+	_add_key_if_missing("toggle_alignment", KEY_P)
+	_add_key_if_missing("career_action", KEY_L)
+	_add_key_if_missing("switch_cultivation_focus", KEY_I)
+	_add_key_if_missing("practice_path", KEY_J)
+	_add_key_if_missing("switch_martial_art", KEY_V)
+	_add_key_if_missing("switch_immortal_art", KEY_B)
 
 func _add_key_if_missing(action: StringName, keycode: Key) -> void:
 	if not InputMap.has_action(action):
@@ -120,7 +310,8 @@ func _add_key_if_missing(action: StringName, keycode: Key) -> void:
 	InputMap.action_add_event(action, event)
 
 func is_input_blocked() -> bool:
-	return ui.is_dialogue_open()
+	# 允许玩家在对话期间继续移动，保持自由操控
+	return false
 
 func advance_modal_dialogue() -> void:
 	ui.advance_dialogue()
@@ -143,88 +334,210 @@ func get_realm_name() -> String:
 	return REALMS[realm_index]
 
 func get_breakthrough_cost() -> int:
-	return 80 + realm_index * 50
+	return 160 + realm_index * 120
+
+func get_breakthrough_cultivation_req() -> int:
+	return 140 + realm_index * 120
 
 func get_current_objective_text() -> String:
-	match tutorial_stage:
+	return "天地自宽，随心而行。你和谁交谈、去哪里，都会留下回响。"
+
+func get_main_quest_objective() -> String:
+	if joined_faction == "无门无派":
+		return "四处走走，多和各派人物聊聊，也许会有新的去处。"
+	match main_quest_stage:
 		0:
-			return "按 E 推完骷髅废话"
+			return "先把日子过稳：种田、采药、修炼都能打开新门路。"
 		1:
-			return "去开垦一块灵田，证明你不是来散步的"
+			return "听说演武坪近日很热闹，去见识见识也无妨。"
 		2:
-			return "往田里播一颗灵种"
+			return "山中遗墟常出稀罕灵材，或许值得冒险一趟。"
 		3:
-			return "再对着灵田引灵一次，别让草比你还懒"
+			return "若你觉得火候到了，不妨试着冲击更高境界。"
 		4:
-			return "等成熟后收获，骷髅已经准备好嘲笑你了"
+			return "风声越来越紧，先稳住资源与人脉，再决定下一步。"
 		5:
-			return "找青岚师姐说话，看看活人是不是也这么难带"
+			return "最近几夜不太平，去听听各派口风再作判断。"
+		6:
+			return "你已卷入更深的局，修为和立场都需要再表态。"
+		7:
+			return "归墟将启前夜，所有旧账都在逼近。"
 		_:
-			return "自由修仙。骷髅还在旁边看你笑话。"
+			return "江湖路远，继续为%s行事，风声自会变化。" % joined_faction
+
+func _show_legend_opening() -> void:
+	legend_intro_seen = true
+	ui.show_dialogue("山海旧谣", [
+		"相传百年前，天裂三夜，灵潮倒灌九州，诸派自此并立。",
+		"青岚宗镇守东岭灵脉，幽冥殿潜行夜渊，正邪纷争从未止息。",
+		"你只是山门最不起眼的弟子，却在血月之夜梦见一枚碎裂古印。",
+		"骷髅说那是‘归墟印’——若其重现，天下宗门都将改写座次。"
+	])
+	ui.push_message("你的家世：%s｜天命：%s" % [life_origin, life_traits.get("tag", "平常")])
+	ui.push_message("当前故事线：%s｜所属门派：%s" % [story_route, joined_faction])
+	ui.push_message("阶段：序章（旁观者）")
+
+func _roll_life_origin() -> void:
+	var origins := [
+		{"name": "山野遗孤", "spirit": 90.0, "stones": 30, "cultivation": 8, "tag": "根骨平稳"},
+		{"name": "宗门旁支", "spirit": 80.0, "stones": 56, "cultivation": 12, "tag": "家传吐纳"},
+		{"name": "商贾之后", "spirit": 74.0, "stones": 96, "cultivation": 5, "tag": "囊中丰足"},
+		{"name": "流亡剑裔", "spirit": 102.0, "stones": 24, "cultivation": 16, "tag": "杀伐余烬"},
+		{"name": "夺舍残魂", "spirit": 112.0, "stones": 18, "cultivation": 20, "tag": "魂火不稳"}
+	]
+	var pick: Dictionary = origins[randi() % origins.size()]
+	life_origin = pick["name"]
+	life_traits = pick
+	spirit = min(float(pick["spirit"]), max_spirit)
+	spirit_stones = int(pick["stones"])
+	cultivation = int(pick["cultivation"])
+	var routes := ["正道守山", "魔门逆命", "游侠问道", "王朝诏命"]
+	story_route = routes[randi() % routes.size()]
+	var roots := ["金灵根", "木灵根", "水灵根", "火灵根", "土灵根", "风灵根", "雷灵根", "杂灵根", "天灵根", "变异冰灵根", "变异毒灵根", "变异空灵根"]
+	spiritual_root = roots[randi() % roots.size()]
+	if spiritual_root == "天灵根":
+		cultivation += 10
+		spirit = min(spirit + 12.0, max_spirit)
+	elif spiritual_root == "杂灵根":
+		spirit_stones += 8
+	joined_faction = "无门无派"
+	story_phase = 0
+	if life_origin == "夺舍残魂" and randf() < 0.35:
+		_trigger_death("夺舍失败，识海反噬。少侠请重新来过。")
+	if randf() < 0.05:
+		_trigger_death("你一出生便卷入仇杀，未及修行已身死道消。")
+
+func _trigger_death(reason: String) -> void:
+	if _is_dead:
+		return
+	_is_dead = true
+	ui.show_dialogue("命数已尽", [
+		reason,
+		"少侠请重新来过。"
+	])
+	ui.push_message("第%d次命轮终结。正在重开…" % (reincarnation_count + 1))
+	_restart_reincarnation()
+
+func _restart_reincarnation() -> void:
+	reincarnation_count += 1
+	_reset_world_state()
+	_roll_life_origin()
+	_is_dead = false
+	_show_legend_opening()
+	start_skeleton_intro()
+
+func _reset_world_state() -> void:
+	day = 1
+	season_index = 0
+	total_minutes = float(START_HOUR * 60 + START_MINUTE)
+	current_weather = _roll_weather()
+	max_spirit = 100.0
+	spirit = 80.0
+	spirit_stones = 36
+	realm_index = 0
+	cultivation = 0
+	tutorial_stage = 0
+	tutorial_intro_seen = false
+	legend_intro_seen = false
+	main_quest_stage = 0
+	story_route = "正道守山"
+	joined_faction = "无门无派"
+	story_phase = 0
+	side_story_stage = 0
+	spirit_pearls = {"风灵珠": false, "雷灵珠": false, "水灵珠": false, "火灵珠": false, "土灵珠": false}
+	unlocked_story_count = 0
+	inventory = {"青灵草籽": 6, "赤火芝籽": 4, "青灵草": 0, "赤火芝": 0}
+	player.position = Vector2(320, 380)
 
 func start_skeleton_intro() -> void:
 	tutorial_intro_seen = true
 	tutorial_stage = 0
 	ui.show_dialogue(SKELETON_NAME, [
-		"醒了？很好，说明你还没彻底死透。虽然从你这眼神看，也差不了多少。",
-		"欢迎来到青岚山。别紧张，这里不收废物。最多把废物埋在后山，种成灵草。",
-		"你左手边那几块地，看见没？先去开一块。连泥都不会翻，就别妄想翻身成仙。",
-		"按 E 跟东西互动。是的，我知道这种常识还要我教，你已经开始让我头疼了。"
+		"醒了就去走走。山门里的人、山外的风，都能做你的老师。",
+		"别急着问路，也别急着求成。先听，再看，再动手。"
 	])
 
 func show_skeleton_hint() -> void:
+	show_skeleton_qa(1)
+
+func show_skeleton_qa(ask_count: int) -> void:
+	var topic := ask_count % 5
 	var lines: Array[String] = []
-	match tutorial_stage:
-		0, 1:
-			lines = ["你还站着？去开垦灵田。地不会自己翻，就像你不会自己开窍。"]
+	match topic:
+		0:
+			lines = [
+				"你问修炼？先活下来再谈飞升。白天稳灵息，夜里别硬冲境界。",
+				"我已经说第三遍了：急功近利的人，通常埋得也比较快。"
+			]
+		1:
+			lines = [
+				"你问门派？青岚宗讲规矩，幽冥殿讲结果，江湖散修讲命硬。",
+				"别再让我做你的百科全书，我死了都没这么闲。"
+			]
 		2:
-			lines = ["地翻好了就播种。别对着空地发呆，发呆长不出灵草，只长得出失败。"]
+			lines = [
+				"你问机缘？断云崖和裂隙秘境都有好东西，也都有棺材位。",
+				"你要是再问‘稳不稳’，我建议你回屋种地。"
+			]
 		3:
-			lines = ["灵种下去了，再引灵一次。你要是连催个芽都嫌累，建议直接回棺材。"]
-		4:
-			lines = ["等它成熟再收。提前薅秃只能证明你对植物和人生都没有耐心。"]
-		5:
-			lines = ["去找青岚师姐。活人至少还会给你点种子，我只会给你建议，而且很刻薄。"]
+			lines = [
+				"你问突破？灵力满、修为够、灵石足，再挑个好天象。",
+				"问完就去练，别把我当说书先生。"
+			]
 		_:
-			lines = ["不错，你至少学会了最基础的事。离成仙还远，但离被我骂废物稍微远了一点。"]
+			lines = [
+				"又来问？行吧：多和人说话，多跑地图，线索自己会露头。",
+				"最后一次提醒——我很有耐心，但不是对你。"
+			]
 	ui.show_dialogue(SKELETON_NAME, lines)
 
 func notify_tutorial_event(event_name: String) -> void:
-	match event_name:
-		"tilled":
-			if tutorial_stage <= 1:
-				tutorial_stage = 2
-				ui.show_dialogue(SKELETON_NAME, [
-					"哦？你居然真翻出来了。看来你不是纯摆设。",
-					"现在把灵种播进去。随便挑一颗，反正第一轮你大概率也种不出什么传世奇株。"
+	if event_name == "met_npc":
+		tutorial_stage = max(tutorial_stage, 1)
+	_update_main_quest(event_name)
+
+func offer_join_faction(faction_name: String, npc_name: String) -> void:
+	if joined_faction != "无门无派":
+		return
+	joined_faction = faction_name
+	main_quest_stage = max(main_quest_stage, 1)
+	story_phase = max(story_phase, 1)
+	ui.show_dialogue(npc_name, [
+		"从今日起，你便算%s记名弟子。" % faction_name,
+		"记住：门派给你庇护，也要你拿结果回报。"
+	])
+	ui.push_message("你已加入%s。" % faction_name)
+	ui.push_message("阶段：第一幕（入局）")
+
+func _update_main_quest(event_name: String) -> void:
+	match main_quest_stage:
+		0:
+			if inventory.get("青灵草", 0) >= 3:
+				main_quest_stage = 1
+				ui.show_dialogue("青岚师姐", [
+					"三株青灵草齐了，不错。下一步去演武坪切磋，别只会种地。",
+					"去不去随你，但见过刀剑的人，心境会不一样。"
 				])
-		"planted":
-			if tutorial_stage <= 2:
-				tutorial_stage = 3
-				ui.show_dialogue(SKELETON_NAME, [
-					"总算播下去了。看到没，你离农业废物只差半步了。",
-					"接下来对着灵田再引一次灵。灵气懂事，你最好也懂事。"
+		1:
+			if event_name == "arena_trial":
+				main_quest_stage = 2
+				ui.show_dialogue("松鹤师叔", [
+					"拳脚还算沉稳。去残碑遗墟寻一株赤火芝，准备夜试药引。",
+					"路在你脚下，敢走才有机缘。"
 				])
-		"channeled":
-			if tutorial_stage <= 3:
-				tutorial_stage = 4
-				ui.show_dialogue(SKELETON_NAME, [
-					"这才像点样子。现在等成熟，再收获。",
-					"耐心一点。别像某些人修仙三天就想飞升，最后只会飞出去摔死。"
+		2:
+			if inventory.get("赤火芝", 0) >= 1:
+				main_quest_stage = 3
+				ui.show_dialogue("玄尘师父", [
+					"药引已备，接下来只差境界。",
+					"急与不急都由你，但境界不会等人。"
 				])
-		"harvested":
-			if tutorial_stage <= 4:
-				tutorial_stage = 5
-				ui.show_dialogue(SKELETON_NAME, [
-					"居然真收上来了。很好，至少饿不死，或者说，暂时饿不死。",
-					"去找青岚师姐说话。她脾气比我好，但眼光未必比我差。"
-				])
-		"met_npc":
-			if tutorial_stage <= 5:
-				tutorial_stage = 6
-				ui.show_dialogue(SKELETON_NAME, [
-					"行，活人关系也搭上了。你现在算半个能喘气的修士了。",
-					"剩下的路自己滚着走吧。我会继续看着你，主要是为了在你犯蠢时及时嘲笑。"
+		3:
+			if realm_index >= 1:
+				main_quest_stage = 4
+				ui.show_dialogue("碎嘴骷髅", [
+					"行啊，你真筑基了。归墟印的事，看来得让你掺和一脚。",
+					"你以为这就完了？这才刚开始。"
 				])
 
 func _on_hour_changed(hour: int) -> void:
@@ -232,6 +545,9 @@ func _on_hour_changed(hour: int) -> void:
 		tile.pass_hour(current_weather)
 	if hour == 6:
 		spirit = min(max_spirit, spirit + 8.0)
+	if hour % 6 == 0 and hour != _skeleton_check_hour:
+		_skeleton_check_hour = hour
+		ui.push_message("碎嘴骷髅在远处盯着你：\"别偷懒，江湖各派都在看你表现。\"")
 
 func _on_new_day(new_day: int) -> void:
 	day = new_day
@@ -242,9 +558,498 @@ func _on_new_day(new_day: int) -> void:
 	for node in _daily_reset_nodes:
 		if node.has_method("on_day_started"):
 			node.on_day_started(day)
+	_refresh_daily_tasks()
+	_trigger_daily_event_pack()
 	if current_weather == "血月":
 		environment_fx.trigger_thunder_strike(Vector2(320, 210), false)
+	_update_story_phase_by_day()
+	_advance_long_arc_by_day()
+	_trigger_post_mainline_story()
 	save_game()
+
+func _trigger_post_mainline_story() -> void:
+	if main_quest_stage < 8:
+		return
+	if side_story_stage == 0 and day >= 30:
+		side_story_stage = 1
+		ui.show_dialogue("异闻录", [
+			"【后续故事·药王失踪】药庐主事失联，只留下一张残图。",
+			"线索指向听雨潭与残碑遗墟之间的旧路。"
+		])
+	elif side_story_stage == 1 and day >= 34:
+		side_story_stage = 2
+		ui.show_dialogue("江湖耳报", [
+			"【后续故事·剑帖再现】昆仑旧剑帖重现黑市，几派同时派人争夺。",
+			"你若介入，可能换来新盟友，也可能添旧仇。"
+		])
+	elif side_story_stage == 2 and day >= 38:
+		side_story_stage = 3
+		ui.show_dialogue("碎嘴骷髅", [
+			"【后续故事·故城夜雨】城外废城在雨夜亮灯，像在等谁回去。",
+			"去不去随你，但这种门不会一直开着。"
+		])
+	elif side_story_stage == 3 and _count_collected_pearls() >= 3:
+		side_story_stage = 4
+		ui.show_dialogue("古卷残页", [
+			"【后续故事·灵珠旧约】你已凑齐三枚灵珠，古卷开始显现缺失地图。",
+			"传说五珠归位，可开归墟内层。"
+		])
+	elif side_story_stage == 4 and _count_collected_pearls() >= 5:
+		side_story_stage = 5
+		ui.show_dialogue("碎嘴骷髅", [
+			"【后续故事·五珠齐鸣】五灵珠已齐，天地灵脉共振。",
+			"你可以选择开启归墟内层，或者把钥匙留给后来者。"
+		])
+
+func collect_spirit_pearl(pearl_name: String, source_name: String) -> void:
+	if not spirit_pearls.has(pearl_name):
+		return
+	if bool(spirit_pearls[pearl_name]):
+		return
+	spirit_pearls[pearl_name] = true
+	ui.show_dialogue("灵珠异象", [
+		"你在%s获得了%s。珠光映照出一段失落旧闻。" % [source_name, pearl_name],
+		"当前灵珠进度：%d / 5。" % _count_collected_pearls()
+	])
+	feedback_layer.show_world_popup(player.global_position + Vector2(0, -40), pearl_name, Color("9de8ff"), 1.4)
+
+func _count_collected_pearls() -> int:
+	var count := 0
+	for key in spirit_pearls.keys():
+		if bool(spirit_pearls[key]):
+			count += 1
+	return count
+
+func apply_drunkenness(duration_seconds: float, strength: float) -> void:
+	drunk_timer = max(drunk_timer, duration_seconds)
+	drunk_strength = max(drunk_strength, clamp(strength, 0.05, 0.45))
+	ui.push_message("你有点上头了，脚下开始发飘。")
+
+
+func toggle_traversal_mode(mode_name: String) -> void:
+	if traversal_mode == mode_name:
+		traversal_mode = "walk"
+		ui.push_message("你收起%s，回到步行。" % ("飞剑" if mode_name == "sword_flight" else "灵兽"))
+		return
+	traversal_mode = mode_name
+	if mode_name == "sword_flight":
+		ui.show_dialogue("御剑起行", ["你踏上飞剑，风声掠耳，山河在脚下后退。", "御剑时更耗灵，但赶路更快。"])
+	else:
+		ui.show_dialogue("灵兽同行", ["灵兽伏低身形让你骑上，步伐沉稳如鼓点。", "骑乘时更耐久，适合长线探索。"])
+
+func cycle_spirit_attitude() -> void:
+	var attitudes := ["善待", "交易", "驱逐"]
+	var idx := attitudes.find(spirit_npc_attitude)
+	idx = (idx + 1) % attitudes.size()
+	spirit_npc_attitude = attitudes[idx]
+	ui.push_message("你对妖鬼的处置倾向切换为：%s（按 O 可继续切换）。" % spirit_npc_attitude)
+
+func get_spirit_attitude() -> String:
+	return spirit_npc_attitude
+
+func cycle_alignment() -> void:
+	var alignments := ["好人", "中立", "坏人"]
+	var idx := alignments.find(morality_alignment)
+	idx = (idx + 1) % alignments.size()
+	morality_alignment = alignments[idx]
+	ui.push_message("你的江湖立场切换为：%s（按 P 切换）。" % morality_alignment)
+
+func apply_morality(delta: int, source: String) -> void:
+	morality_score = clamp(morality_score + delta, -100, 100)
+	if morality_score >= 25:
+		morality_alignment = "好人"
+	elif morality_score <= -25:
+		morality_alignment = "坏人"
+	else:
+		morality_alignment = "中立"
+	feedback_layer.show_world_popup(player.global_position + Vector2(20, -30), "善恶 %+d" % delta, Color("ffd0a3"))
+	ui.push_message("%s影响了你的名声：%s（善恶值 %d）。" % [source, morality_alignment, morality_score])
+
+func get_morality_alignment() -> String:
+	return morality_alignment
+
+func knows_language(lang: String) -> bool:
+	return bool(known_languages.get(lang, false))
+
+func add_language_exp(lang: String, amount: int) -> void:
+	var old_exp := int(language_exp.get(lang, 0))
+	var new_exp := min(old_exp + amount, 100)
+	language_exp[lang] = new_exp
+	if new_exp >= 100 and not knows_language(lang):
+		known_languages[lang] = true
+		ui.show_dialogue("语言通晓", [
+			"你终于听懂了%s。" % lang,
+			"从现在起，你可以与对应国度的人流畅交流。"
+		])
+	elif new_exp > old_exp:
+		ui.push_message("你对%s的理解提升到 %d/100。" % [lang, new_exp])
+
+func choose_human_path(path_name: String) -> void:
+	if human_path == path_name:
+		return
+	human_path = path_name
+	match human_path:
+		"学子":
+			ui.show_dialogue("人间考学", ["你报考书院，开始走学子之路。", "读书明理，也能为修行开眼界。"])
+			add_cultivation(5, player.global_position)
+		"武夫":
+			ui.show_dialogue("投身武途", ["你拜入武馆，走上武夫路子。", "拳脚虽粗，胜在直取要害。"])
+			add_cultivation(8, player.global_position)
+			restore_spirit(6.0)
+		"小贩":
+			ui.show_dialogue("开市行商", ["你在集市支起小摊，开始做小贩。", "讲价也是江湖功夫。"])
+			add_spirit_stones(12)
+		"医师":
+			ui.show_dialogue("悬壶济世", ["你到药庐学起医理，准备行医济人。", "识草木、辨寒热，也是一条修行路。"])
+			restore_spirit(10.0)
+		"猎户":
+			ui.show_dialogue("山野猎行", ["你背弓入山，做起猎户营生。", "看风辨迹，胆气与耐性缺一不可。"])
+			add_cultivation(6, player.global_position)
+		"匠人":
+			ui.show_dialogue("百工入道", ["你走进作坊，学锻打与机关。", "器成于火，心成于磨。"])
+			add_item("灵木", 1)
+		_:
+			pass
+
+func try_human_career_action() -> void:
+	if human_path == "未定":
+		var options := ["学子", "武夫", "小贩", "医师", "猎户", "匠人"]
+		var pick := options[randi() % options.size()]
+		choose_human_path(pick)
+		return
+	match human_path:
+		"学子":
+			if cultivation >= 30 + exam_rank * 20:
+				exam_rank += 1
+				add_cultivation(10 + exam_rank * 2, player.global_position)
+				apply_morality(2, "书院乡试")
+				ui.push_message("你通过了第%d场科考，名望渐起。" % exam_rank)
+			else:
+				ui.push_message("学识火候未够，先多读书修身。")
+		"武夫":
+			add_cultivation(12, player.global_position)
+			spirit = max(spirit - 4.0, 0.0)
+			apply_morality(0, "武馆擂台")
+			ui.push_message("你在擂台连战三场，筋骨更硬。")
+		"小贩":
+			var income := 6 + randi() % 10
+			add_spirit_stones(income)
+			apply_morality(1 if randf() < 0.5 else -1, "街市买卖")
+			ui.push_message("你今天摆摊盈利 %d 灵石。" % income)
+		"医师":
+			restore_spirit(12.0)
+			add_cultivation(7, player.global_position)
+			apply_morality(3, "药庐义诊")
+			ui.push_message("你在药庐义诊，救治了几名伤者。")
+		"猎户":
+			var loot := 1 + randi() % 2
+			add_item("兽骨", loot)
+			add_spirit_stones(4 + randi() % 6)
+			add_cultivation(9, player.global_position)
+			apply_morality(0, "山林狩猎")
+			ui.push_message("你入山狩猎，带回兽骨 x%d。" % loot)
+		"匠人":
+			add_item("灵木", 1)
+			add_item("灵石块", 1)
+			add_cultivation(8, player.global_position)
+			apply_morality(1, "作坊铸造")
+			ui.push_message("你在作坊打磨器具，手艺更精了。")
+
+func cycle_cultivation_focus() -> void:
+	var paths := ["丹修", "符修", "体修", "法修"]
+	var idx := paths.find(cultivation_focus)
+	idx = (idx + 1) % paths.size()
+	cultivation_focus = paths[idx]
+	ui.push_message("当前主修切换为：%s（可兼修，按 J 修行）。" % cultivation_focus)
+
+func _get_root_bonus_scale(path_name: String) -> float:
+	if spiritual_root == "天灵根":
+		return 1.18
+	if spiritual_root == "杂灵根":
+		return 0.92
+	if spiritual_root == "火灵根" and path_name == "丹修":
+		return 1.12
+	if spiritual_root == "木灵根" and path_name == "丹修":
+		return 1.08
+	if spiritual_root == "雷灵根" and path_name == "法修":
+		return 1.12
+	if spiritual_root == "金灵根" and path_name == "体修":
+		return 1.08
+	if spiritual_root == "土灵根" and path_name == "体修":
+		return 1.06
+	if spiritual_root == "水灵根" and path_name == "符修":
+		return 1.08
+	if spiritual_root == "变异冰灵根" and (path_name == "符修" or path_name == "法修"):
+		return 1.16
+	if spiritual_root == "变异毒灵根" and path_name == "丹修":
+		return 1.15
+	if spiritual_root == "变异空灵根":
+		return 1.14
+	return 1.0
+
+func cycle_martial_art() -> void:
+	var arts := ["太极剑意", "降龙掌势", "独孤九剑", "黯然销魂掌", "凌波微步", "七伤拳"]
+	var idx := arts.find(martial_art)
+	idx = (idx + 1) % arts.size()
+	martial_art = arts[idx]
+	ui.push_message("武学切换为：%s。" % martial_art)
+
+func cycle_immortal_art() -> void:
+	var arts := ["青岚吐纳经", "太虚御雷诀", "玄冰真诀", "九转丹火经", "万象符箓录", "不灭金身法"]
+	var idx := arts.find(immortal_art)
+	idx = (idx + 1) % arts.size()
+	immortal_art = arts[idx]
+	ui.push_message("仙法切换为：%s。" % immortal_art)
+
+func _get_martial_bonus() -> float:
+	var bonus := 1.0
+	if martial_art == "降龙掌势" and spiritual_root == "火灵根":
+		bonus += 0.08
+	if martial_art == "独孤九剑" and spiritual_root == "金灵根":
+		bonus += 0.1
+	if martial_art == "凌波微步" and (spiritual_root == "风灵根" or spiritual_root == "变异空灵根"):
+		bonus += 0.1
+	if martial_art == "七伤拳" and spiritual_root == "土灵根":
+		bonus += 0.08
+	return bonus
+
+func _get_immortal_art_bonus(path_name: String) -> float:
+	var bonus := 1.0
+	if immortal_art == "太虚御雷诀" and path_name == "法修" and spiritual_root == "雷灵根":
+		bonus += 0.12
+	if immortal_art == "玄冰真诀" and path_name == "符修" and spiritual_root == "变异冰灵根":
+		bonus += 0.14
+	if immortal_art == "九转丹火经" and path_name == "丹修" and spiritual_root == "火灵根":
+		bonus += 0.12
+	if immortal_art == "万象符箓录" and path_name == "符修":
+		bonus += 0.08
+	if immortal_art == "不灭金身法" and path_name == "体修":
+		bonus += 0.1
+	return bonus
+
+func practice_cultivation_path() -> void:
+	var path_name := cultivation_focus
+	var current := int(cultivation_paths.get(path_name, 0))
+	var scale := _get_root_bonus_scale(path_name) * _get_martial_bonus() * _get_immortal_art_bonus(path_name)
+	var gain := int(round((4 + current * 0.4) * scale))
+	cultivation_paths[path_name] = current + gain
+	match path_name:
+		"丹修":
+			restore_spirit(8.0)
+			add_item("赤火芝", 1)
+			add_cultivation(6 + gain, player.global_position)
+		"符修":
+			add_spirit_stones(6 + current / 6)
+			add_cultivation(7 + gain, player.global_position)
+		"体修":
+			max_spirit = min(max_spirit + 1.0, 220.0)
+			spirit = min(spirit + 4.0, max_spirit)
+			add_cultivation(8 + gain, player.global_position)
+		"法修":
+			add_cultivation(11 + gain, player.global_position)
+			spirit = max(spirit - 3.0, 0.0)
+	ui.push_message("你进行了一次%s修行（武学：%s｜仙法：%s），分支造诣达到 %d。灵根：%s。" % [path_name, martial_art, immortal_art, cultivation_paths[path_name], spiritual_root])
+	advance_minutes(45)
+
+func apply_spirit_relation_delta(delta: int, speaker: String) -> void:
+	spirit_npc_relation = clamp(spirit_npc_relation + delta, -100, 100)
+	feedback_layer.show_world_popup(player.global_position + Vector2(0, -26), "妖鬼缘 %+d" % delta, Color("cba8ff"))
+	ui.push_message("%s对你的态度发生变化，当前妖鬼缘：%d。" % [speaker, spirit_npc_relation])
+
+func get_player_speed_multiplier() -> float:
+	match traversal_mode:
+		"sword_flight":
+			return 1.65
+		"spirit_mount":
+			return 1.35
+		_:
+			return 1.0
+
+func modify_move_input(input_vector: Vector2) -> Vector2:
+	if drunk_timer <= 0.0:
+		return input_vector
+	var wobble_x := sin(total_minutes * 0.17) * drunk_strength
+	var wobble_y := cos(total_minutes * 0.19) * drunk_strength
+	var drifted := input_vector + Vector2(wobble_x, wobble_y)
+	if drifted.length() > 1.0:
+		drifted = drifted.normalized()
+	return drifted
+
+
+func _refresh_daily_tasks() -> void:
+	if daily_task_day == day and not daily_tasks.is_empty():
+		return
+	daily_task_day = day
+	daily_tasks = [
+		{"id": "talk", "title": "拜访同门", "target": 2, "progress": 0, "claimed": false, "reward": {"stones": 10, "cultivation": 8}},
+		{"id": "free", "title": "行脚江湖", "target": 2, "progress": 0, "claimed": false, "reward": {"stones": 6, "spirit": 8.0}},
+		{"id": "meditate", "title": "静息吐纳", "target": 1, "progress": 0, "claimed": false, "reward": {"cultivation": 10}}
+	]
+	ui.push_message("【日常任务】已刷新：拜访同门 / 行脚江湖 / 静息吐纳。")
+
+func _progress_daily_task(task_id: String, amount: int) -> void:
+	for i in range(daily_tasks.size()):
+		var task: Dictionary = daily_tasks[i]
+		if task.get("id", "") != task_id:
+			continue
+		var target := int(task.get("target", 1))
+		var progress := min(int(task.get("progress", 0)) + amount, target)
+		var claimed := bool(task.get("claimed", false))
+		task["progress"] = progress
+		daily_tasks[i] = task
+		ui.push_message("【日常任务】%s %d/%d" % [task.get("title", "任务"), progress, target])
+		if progress >= target and not claimed:
+			task["claimed"] = true
+			daily_tasks[i] = task
+			_claim_daily_task_reward(task)
+		break
+
+func _claim_daily_task_reward(task: Dictionary) -> void:
+	var reward: Dictionary = task.get("reward", {})
+	var stones := int(reward.get("stones", 0))
+	var spirit_bonus := float(reward.get("spirit", 0.0))
+	var cultivation_bonus := int(reward.get("cultivation", 0))
+	if stones > 0:
+		add_spirit_stones(stones)
+	if spirit_bonus > 0.0:
+		restore_spirit(spirit_bonus)
+		feedback_layer.show_world_popup(player.global_position + Vector2(-10, -26), "+%d 灵力" % int(spirit_bonus), Color("9de8ff"))
+	if cultivation_bonus > 0:
+		add_cultivation(cultivation_bonus, player.global_position + Vector2(0, -18))
+	ui.show_dialogue("日常任务完成", [
+		"你完成了【%s】。" % task.get("title", "任务"),
+		"今日的江湖仍在继续，去和更多人聊聊吧。"
+	])
+
+func _trigger_daily_event_pack() -> void:
+	var routine_events := [
+		{"title": "药圃除草", "desc": "你帮药庐清理杂草，顺便温习辨药。", "cultivation": 5, "stones": 0, "spirit": -2.0},
+		{"title": "外门晨课", "desc": "晨课点名，你被拉去演示吐纳。", "cultivation": 4, "stones": 2, "spirit": -1.0},
+		{"title": "山道巡查", "desc": "你与巡山弟子走了一圈，路上捡到散落灵石。", "cultivation": 3, "stones": 4, "spirit": -2.0},
+		{"title": "灶房帮工", "desc": "灶房缺人，你劈柴半日，换来一顿热饭。", "cultivation": 2, "stones": 3, "spirit": 4.0}
+	]
+	var routine: Dictionary = routine_events[randi() % routine_events.size()]
+	_apply_daily_event(routine, "日常")
+	if randf() < 0.38:
+		var incident_events := [
+			{"title": "夜半失火", "desc": "仓房起火，你抢出一批种子却被浓烟呛伤。", "cultivation": 6, "stones": -4, "spirit": -12.0},
+			{"title": "灵兽闯田", "desc": "灵鹿闯入田埂后又留下一枚奇异晶核。", "cultivation": 8, "stones": 10, "spirit": -3.0},
+			{"title": "黑市来客", "desc": "神秘商人低价甩货，你赌了一把，赚到灵石。", "cultivation": 0, "stones": 14, "spirit": 0.0},
+			{"title": "旧敌尾随", "desc": "山门外有人试探你底细，短暂交手后各退一步。", "cultivation": 10, "stones": 0, "spirit": -8.0}
+		]
+		var incident: Dictionary = incident_events[randi() % incident_events.size()]
+		_apply_daily_event(incident, "突发")
+	if randf() < 0.42:
+		_trigger_random_character_event()
+	if randf() < 0.45:
+		_trigger_story_snippet()
+
+func _trigger_story_snippet() -> void:
+	var snippets := [
+		"你在旧井旁听见童谣，词里藏着失传阵图的方位。",
+		"茶棚说书人提到‘北岭白衣’，据说只在血月前后现身。",
+		"外门弟子争论谁是叛徒，最后谁也不敢说出那个名字。",
+		"山门石狮夜里落泪，执事说那是潮气，老人说那是预兆。",
+		"你在摊贩残册里翻到一页：‘归墟不收无悔之人’。",
+		"有散修在墙上留字：‘若见青灯三盏，切莫回头。’",
+		"雨夜里有人唱古调，曲终时脚印只剩进山的一行。",
+		"药庐老账里有一笔空白，日期恰是血月初现那年。",
+		"断云崖下捡到半截玉佩，背面刻着陌生门徽。",
+		"巡山弟子说，昨夜林中有兽影朝你洞府方向跪伏。"
+	]
+	unlocked_story_count += 1
+	var line := snippets[randi() % snippets.size()]
+	ui.show_dialogue("江湖小传·第%d则" % unlocked_story_count, [line, "你把这则见闻记在册中，或许日后能串起更大的真相。"])
+
+func _trigger_random_character_event() -> void:
+	var surnames := ["沈", "苏", "顾", "萧", "陆", "林", "白", "秦"]
+	var names := ["行舟", "无咎", "听澜", "照影", "归尘", "怀玉", "千城", "逐月"]
+	var roles := ["散修", "游商", "流亡剑客", "符师", "药师", "说书人"]
+	var temp_name := "%s%s" % [surnames[randi() % surnames.size()], names[randi() % names.size()]]
+	var role := roles[randi() % roles.size()]
+	var flavor := [
+		"留下一句忠告后匆匆离去。",
+		"与你交换了一段江湖传闻。",
+		"看了看你的气机，点头不语。",
+		"在茶棚坐了半刻，便消失在人群里。"
+	]
+	var reward_roll := randi() % 3
+	if reward_roll == 0:
+		add_spirit_stones(6 + randi() % 8)
+	elif reward_roll == 1:
+		add_cultivation(5 + randi() % 6, player.global_position + Vector2(0, -16))
+	else:
+		restore_spirit(8.0)
+	ui.show_dialogue("偶遇角色", [
+		"你遇见了%s（%s），%s" % [temp_name, role, flavor[randi() % flavor.size()]],
+		"这种人不会长期停留，但每次出现都可能改写你当天的节奏。"
+	])
+
+func _apply_daily_event(event_data: Dictionary, event_type: String) -> void:
+	var spirit_delta := float(event_data.get("spirit", 0.0))
+	var stones_delta := int(event_data.get("stones", 0))
+	var cultivation_delta := int(event_data.get("cultivation", 0))
+	spirit = clamp(spirit + spirit_delta, 0.0, max_spirit)
+	spirit_stones = max(spirit_stones + stones_delta, 0)
+	if cultivation_delta != 0:
+		add_cultivation(cultivation_delta, player.global_position + Vector2(0, -18))
+	ui.push_message("【%s】%s：%s" % [event_type, event_data.get("title", "无名事件"), event_data.get("desc", "")])
+	if stones_delta != 0:
+		feedback_layer.show_world_popup(player.global_position + Vector2(24, -24), "%+d 灵石" % stones_delta, Color("ffe394"))
+	if spirit_delta != 0.0:
+		feedback_layer.show_world_popup(player.global_position + Vector2(-20, -22), "%+d 灵力" % int(spirit_delta), Color("9de8ff"))
+
+func _advance_long_arc_by_day() -> void:
+	if joined_faction == "无门无派":
+		return
+	if main_quest_stage == 4 and day >= 8:
+		main_quest_stage = 5
+		ui.show_dialogue("驿站密信", [
+			"边地传来消息：多处灵田被夜袭，疑似有人试阵。",
+			"你若继续追下去，就没有回头路了。"
+		])
+	elif main_quest_stage == 5 and day >= 14:
+		main_quest_stage = 6
+		ui.show_dialogue("门中长议", [
+			"各派都想把你拉到自己那一边，因为你看过太多真相。",
+			"从这一刻起，你做的每件事都会被记账。"
+		])
+	elif main_quest_stage == 6 and day >= 21 and realm_index >= 1:
+		main_quest_stage = 7
+		ui.show_dialogue("夜半来客", [
+			"来人只留下一句话：归墟门开前，先决定你要救谁。",
+			"你终于明白，这不是修炼题，而是生死题。"
+		])
+	elif main_quest_stage == 7 and day >= 28:
+		main_quest_stage = 8
+		ui.show_dialogue("章节结语", [
+			"第一卷至此收束，诸派棋盘已布成。",
+			"下一卷，你将亲自落子。"
+		])
+
+func _update_story_phase_by_day() -> void:
+	if joined_faction == "无门无派":
+		return
+	var target_phase := mini(40, 1 + int(day / 2))
+	while story_phase < target_phase:
+		story_phase += 1
+		var beat := _build_story_phase_lines(story_phase)
+		ui.show_dialogue(beat.get("speaker", "江湖风闻"), beat.get("lines", []))
+
+func _build_story_phase_lines(phase: int) -> Dictionary:
+	var tag := "第%d幕" % phase
+	var tone := "风声更紧，盟友与敌人的边界继续模糊。"
+	if phase % 5 == 0:
+		tone = "旧账被翻出，新的代价也被摆上桌面。"
+	elif phase % 7 == 0:
+		tone = "有人失踪，有人倒戈，你的名字开始出现在密卷里。"
+	elif phase % 9 == 0:
+		tone = "边境起火，宗门议事彻夜未停。"
+	var route_hint := "你在%s线上的每次表态，都在改变后续局势。" % story_route
+	return {
+		"speaker": "幕间纪要",
+		"lines": ["【%s】%s" % [tag, tone], route_hint]
+	}
 
 func _roll_weather() -> String:
 	return WEATHER_TABLE[randi() % WEATHER_TABLE.size()]
@@ -264,6 +1069,7 @@ func meditate() -> void:
 	advance_minutes(90)
 	feedback_layer.show_world_popup(player.global_position, "吐纳 +18", Color("9de8ff"))
 	ui.push_message("你在静息吐纳，灵力恢复了。")
+	_progress_daily_task("meditate", 1)
 
 func advance_minutes(minutes: int) -> void:
 	total_minutes += minutes
@@ -271,6 +1077,7 @@ func advance_minutes(minutes: int) -> void:
 func add_item(item_name: String, amount: int) -> void:
 	inventory[item_name] = inventory.get(item_name, 0) + amount
 	ui.queue_redraw()
+	_update_main_quest("item_added")
 
 func remove_item(item_name: String, amount: int) -> bool:
 	if inventory.get(item_name, 0) < amount:
@@ -285,8 +1092,11 @@ func add_spirit_stones(amount: int) -> void:
 	ui.push_message("获得 %d 灵石。" % amount)
 
 func add_cultivation(amount: int, source_position: Vector2) -> void:
-	cultivation += amount
-	feedback_layer.show_world_popup(source_position, "+%d 修为" % amount, Color("c7b3ff"))
+	var realm_damp := 1.0 / (1.0 + float(realm_index) * 0.55)
+	var daily_damp := 1.0 if get_hour_of_day() < 18 else 0.82
+	var adjusted := max(int(round(float(amount) * realm_damp * daily_damp)), 1)
+	cultivation += adjusted
+	feedback_layer.show_world_popup(source_position, "+%d 修为" % adjusted, Color("c7b3ff"))
 
 func try_interact(target_position: Vector2) -> void:
 	var nearest = null
@@ -299,8 +1109,29 @@ func try_interact(target_position: Vector2) -> void:
 	if nearest and nearest.has_method("interact"):
 		feedback_layer.show_world_popup(nearest.global_position, "交互", Color("ffffff"), 0.8)
 		nearest.interact(self)
+		_progress_daily_task("talk", 1)
 	else:
-		ui.push_message("附近没有可交互的目标。")
+		pass
+
+func do_free_action() -> void:
+	var acts := [
+		{"name": "读旧书", "cultivation": 6, "spirit": -2.0, "stones": 0, "desc": "你翻阅旧书，悟到一段行气细节。"},
+		{"name": "河边垂钓", "cultivation": 2, "spirit": -1.0, "stones": 5, "desc": "你在河边发呆垂钓，顺手卖了几尾灵鱼。"},
+		{"name": "街市闲逛", "cultivation": 0, "spirit": 2.0, "stones": -3, "desc": "你逛了集市，花了点灵石换心情。"},
+		{"name": "独自练剑", "cultivation": 10, "spirit": -6.0, "stones": 0, "desc": "你在空地练剑，汗流浃背却更沉稳。"},
+		{"name": "帮人跑腿", "cultivation": 3, "spirit": -2.0, "stones": 8, "desc": "你替人送信跑腿，赚到点碎灵石。"}
+	]
+	var act: Dictionary = acts[randi() % acts.size()]
+	var spirit_delta := float(act.get("spirit", 0.0))
+	var stone_delta := int(act.get("stones", 0))
+	var cult_delta := int(act.get("cultivation", 0))
+	spirit = clamp(spirit + spirit_delta, 0.0, max_spirit)
+	spirit_stones = max(spirit_stones + stone_delta, 0)
+	if cult_delta > 0:
+		add_cultivation(cult_delta, player.global_position)
+	advance_minutes(20 + randi() % 40)
+	ui.push_message("【自由行动】%s：%s" % [act.get("name", "随性而为"), act.get("desc", "")])
+	_progress_daily_task("free", 1)
 
 func attempt_breakthrough() -> void:
 	if realm_index >= REALMS.size() - 1:
@@ -309,17 +1140,25 @@ func attempt_breakthrough() -> void:
 	if spirit < max_spirit:
 		ui.push_message("突破前需要灵力圆满。")
 		return
+	var required_cultivation := get_breakthrough_cultivation_req()
+	if cultivation < required_cultivation:
+		ui.push_message("修为火候不足（%d / %d），强行突破只会走火入魔。" % [cultivation, required_cultivation])
+		return
 	var cost := get_breakthrough_cost()
 	if spirit_stones < cost:
 		ui.push_message("灵石不足，无法布置突破法阵。")
 		return
 	spirit_stones -= cost
 	advance_minutes(180)
-	var success_rate := 0.65 + min(float(cultivation) / 240.0, 0.25)
+	var extra_cultivation := max(cultivation - required_cultivation, 0)
+	var success_rate := 0.32 + min(float(extra_cultivation) / 420.0, 0.26)
 	if current_weather == "血月":
-		success_rate -= 0.1
+		success_rate -= 0.18
 	elif current_weather == "灵雨":
-		success_rate += 0.08
+		success_rate += 0.05
+	if spirit_stones >= cost * 2:
+		success_rate += 0.05
+	success_rate = clamp(success_rate, 0.12, 0.78)
 	var success := randf() < success_rate
 	environment_fx.trigger_breakthrough(player.global_position, success)
 	if success:
@@ -329,10 +1168,13 @@ func attempt_breakthrough() -> void:
 		spirit = max_spirit
 		feedback_layer.show_world_popup(player.global_position, "%s成" % get_realm_name(), Color("ffd77a"), 1.4)
 		ui.push_message("你成功突破至%s，气海大开。" % get_realm_name())
+		_update_main_quest("breakthrough")
 	else:
-		spirit = max(spirit - 28.0, 12.0)
+		spirit = max(spirit - 42.0, 8.0)
+		cultivation = max(cultivation - 18, 0)
+		spirit_stones = max(spirit_stones - int(cost * 0.2), 0)
 		feedback_layer.show_world_popup(player.global_position, "突破受阻", Color("ff8d8d"), 1.2)
-		ui.push_message("突破失败，气息翻涌，所幸未伤根基。")
+		ui.push_message("突破失败，气息逆冲，修为与灵石皆有损耗。")
 
 func get_crop_data(seed_name: String) -> Dictionary:
 	return crop_defs.get(seed_name, {})
@@ -362,6 +1204,33 @@ func save_game() -> void:
 		"cultivation": cultivation,
 		"tutorial_stage": tutorial_stage,
 		"tutorial_intro_seen": tutorial_intro_seen,
+		"legend_intro_seen": legend_intro_seen,
+		"main_quest_stage": main_quest_stage,
+		"life_origin": life_origin,
+		"life_traits": life_traits,
+		"story_route": story_route,
+		"joined_faction": joined_faction,
+		"story_phase": story_phase,
+		"side_story_stage": side_story_stage,
+		"spirit_pearls": spirit_pearls,
+		"reincarnation_count": reincarnation_count,
+		"unlocked_story_count": unlocked_story_count,
+		"daily_tasks": daily_tasks,
+		"daily_task_day": daily_task_day,
+		"traversal_mode": traversal_mode,
+		"spirit_npc_attitude": spirit_npc_attitude,
+		"spirit_npc_relation": spirit_npc_relation,
+		"morality_alignment": morality_alignment,
+		"morality_score": morality_score,
+		"known_languages": known_languages,
+		"language_exp": language_exp,
+		"human_path": human_path,
+		"exam_rank": exam_rank,
+		"spiritual_root": spiritual_root,
+		"cultivation_focus": cultivation_focus,
+		"cultivation_paths": cultivation_paths,
+		"martial_art": martial_art,
+		"immortal_art": immortal_art,
 		"inventory": inventory,
 		"player_position": {
 			"x": player.position.x,
@@ -393,6 +1262,33 @@ func load_game() -> bool:
 	cultivation = int(parsed.get("cultivation", cultivation))
 	tutorial_stage = int(parsed.get("tutorial_stage", tutorial_stage))
 	tutorial_intro_seen = bool(parsed.get("tutorial_intro_seen", tutorial_intro_seen))
+	legend_intro_seen = bool(parsed.get("legend_intro_seen", legend_intro_seen))
+	main_quest_stage = int(parsed.get("main_quest_stage", main_quest_stage))
+	life_origin = str(parsed.get("life_origin", life_origin))
+	life_traits = parsed.get("life_traits", life_traits)
+	story_route = str(parsed.get("story_route", story_route))
+	joined_faction = str(parsed.get("joined_faction", joined_faction))
+	story_phase = int(parsed.get("story_phase", story_phase))
+	side_story_stage = int(parsed.get("side_story_stage", side_story_stage))
+	spirit_pearls = parsed.get("spirit_pearls", spirit_pearls)
+	reincarnation_count = int(parsed.get("reincarnation_count", reincarnation_count))
+	unlocked_story_count = int(parsed.get("unlocked_story_count", unlocked_story_count))
+	daily_tasks = parsed.get("daily_tasks", daily_tasks)
+	daily_task_day = int(parsed.get("daily_task_day", daily_task_day))
+	traversal_mode = str(parsed.get("traversal_mode", traversal_mode))
+	spirit_npc_attitude = str(parsed.get("spirit_npc_attitude", spirit_npc_attitude))
+	spirit_npc_relation = int(parsed.get("spirit_npc_relation", spirit_npc_relation))
+	morality_alignment = str(parsed.get("morality_alignment", morality_alignment))
+	morality_score = int(parsed.get("morality_score", morality_score))
+	known_languages = parsed.get("known_languages", known_languages)
+	language_exp = parsed.get("language_exp", language_exp)
+	human_path = str(parsed.get("human_path", human_path))
+	exam_rank = int(parsed.get("exam_rank", exam_rank))
+	spiritual_root = str(parsed.get("spiritual_root", spiritual_root))
+	cultivation_focus = str(parsed.get("cultivation_focus", cultivation_focus))
+	cultivation_paths = parsed.get("cultivation_paths", cultivation_paths)
+	martial_art = str(parsed.get("martial_art", martial_art))
+	immortal_art = str(parsed.get("immortal_art", immortal_art))
 	inventory = parsed.get("inventory", inventory)
 	var player_position: Dictionary = parsed.get("player_position", {})
 	if not player_position.is_empty():

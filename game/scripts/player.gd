@@ -13,6 +13,7 @@ var _sprite: AnimatedSprite2D
 var _animation_player: AnimationPlayer
 var _aura_scale := 1.0
 var _is_meditating_visual := false
+var _redraw_accum := 0.0
 
 func _ready() -> void:
 	z_index = 2
@@ -21,17 +22,21 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	anim_time += delta
-	if game != null and game.is_input_blocked():
-		if Input.is_action_just_pressed("interact"):
-			game.advance_modal_dialogue()
+	if game != null and Input.is_action_just_pressed("interact") and game.ui.is_dialogue_open():
+		game.advance_modal_dialogue()
 		queue_redraw()
 		return
 	var input_vector := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if game != null and game.has_method("modify_move_input"):
+		input_vector = game.modify_move_input(input_vector)
 	_is_meditating_visual = Input.is_action_pressed("meditate")
 	if input_vector != Vector2.ZERO:
 		facing = input_vector.normalized()
 		direction_name = _get_direction_name(facing)
-		position += facing * speed * delta
+		var speed_mul := 1.0
+		if game != null and game.has_method("get_player_speed_multiplier"):
+			speed_mul = game.get_player_speed_multiplier()
+		position += facing * speed * speed_mul * delta
 		position.x = clamp(position.x, 48.0, 1180.0)
 		position.y = clamp(position.y, 120.0, 650.0)
 		_play_state_animation("walk_%s" % direction_name)
@@ -42,12 +47,19 @@ func _process(delta: float) -> void:
 		game.try_interact(global_position + facing * 28.0)
 	if Input.is_action_just_pressed("meditate"):
 		game.meditate()
-	queue_redraw()
+	_redraw_accum += delta
+	if _redraw_accum >= 0.05 or input_vector != Vector2.ZERO or _is_meditating_visual:
+		_redraw_accum = 0.0
+		queue_redraw()
 
 func _draw() -> void:
 	var aura_alpha := 0.12 + 0.05 * sin(anim_time * 2.0)
 	var aura_radius := 13.0 * _aura_scale + sin(anim_time * 4.0) * 0.8
 	draw_circle(Vector2(0, 26), aura_radius, Color(0.4, 0.9, 1.0, aura_alpha))
+	if game != null and game.traversal_mode == "sword_flight":
+		draw_arc(Vector2(0, 30), 18.0, 0.0, TAU, 24, Color("9ad8ff"), 2.0)
+	elif game != null and game.traversal_mode == "spirit_mount":
+		draw_rect(Rect2(Vector2(-12, 30), Vector2(24, 8)), Color("7c6a50"))
 	if _is_meditating_visual:
 		for i in 3:
 			var radius := 12.0 + i * 7.0 + fmod(anim_time * 22.0, 8.0)

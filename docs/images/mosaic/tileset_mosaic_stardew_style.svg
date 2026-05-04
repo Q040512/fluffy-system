@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'>
+<rect width='1200' height='500' fill='#202a36'/>
+<text x='32' y='50' fill='#f2f6ff' font-size='32'>马赛克地块/建筑色板（星露谷参考）</text>
+<g transform='translate(40,90)'>
+<rect x='0' y='0' width='120' height='120' fill='#6e573d'/><text x='0' y='150' fill='#e8dac8' font-size='20'>农田土</text>
+<rect x='150' y='0' width='120' height='120' fill='#566d82'/><text x='150' y='150' fill='#d5e6f8' font-size='20'>宗门石</text>
+<rect x='300' y='0' width='120' height='120' fill='#5b715d'/><text x='300' y='150' fill='#ddf0e2' font-size='20'>市集地</text>
+<rect x='450' y='0' width='120' height='120' fill='#3d6d90'/><text x='450' y='150' fill='#d6efff' font-size='20'>水域</text>
+<rect x='600' y='0' width='120' height='120' fill='#5b5266'/><text x='600' y='150' fill='#e0d8ef' font-size='20'>遗墟石</text>
+<rect x='750' y='0' width='120' height='120' fill='#4d5d40'/><text x='750' y='150' fill='#e4f2d8' font-size='20'>林缘草</text>
+</g>
+</svg>

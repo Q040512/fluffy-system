@@ -1,0 +1,9 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'>
+<rect width='1280' height='720' fill='#1f2338'/><rect y='120' width='1280' height='600' fill='#303b50'/>
+<text x='40' y='44' fill='white' font-size='30'>五灵珠支线（视觉示意）</text>
+<text x='40' y='80' fill='#d8e8f4' font-size='20'>遗墟/断崖/秘境收集灵珠推进后续剧情</text>
+<circle cx='180' cy='520' r='10' fill='#c6a26b'/><text x='200' y='525' fill='#eef6ff'>残碑遗墟（土灵珠）</text>
+<circle cx='90' cy='430' r='10' fill='#9fd8ff'/><text x='110' y='435' fill='#eef6ff'>断云崖（风灵珠）</text>
+<circle cx='1180' cy='220' r='10' fill='#c6a7ff'/><text x='940' y='225' fill='#eef6ff'>裂隙秘境（雷/水/火灵珠）</text>
+<circle cx='420' cy='360' r='9' fill='#ffd97a'/><text x='435' y='365' fill='#eef6ff'>碎嘴骷髅</text>
+</svg>

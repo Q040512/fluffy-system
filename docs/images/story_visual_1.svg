@@ -1,0 +1,10 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'>
+<rect width='1280' height='720' fill='#15232f'/><rect y='120' width='1280' height='600' fill='#2b4838'/>
+<rect x='160' y='140' width='270' height='250' fill='#4f3f2c'/><rect x='470' y='120' width='130' height='120' fill='#3b5369'/><rect x='470' y='240' width='160' height='140' fill='#314233'/>
+<text x='40' y='44' fill='white' font-size='30'>青岚山晨景（视觉示意）</text>
+<text x='40' y='80' fill='#d8e8f4' font-size='20'>角色分布与互动点概览</text>
+<circle cx='520' cy='188' r='8' fill='#ffd97a'/><text x='535' y='193' fill='#eef6ff'>青岚师姐</text>
+<circle cx='770' cy='330' r='8' fill='#ffd97a'/><text x='785' y='335' fill='#eef6ff'>夜魇魔尊</text>
+<circle cx='1080' cy='430' r='8' fill='#ffd97a'/><text x='1095' y='435' fill='#eef6ff'>演武坪</text>
+<circle cx='1180' cy='220' r='8' fill='#ffd97a'/><text x='1195' y='225' fill='#eef6ff'>裂隙秘境</text>
+</svg>
