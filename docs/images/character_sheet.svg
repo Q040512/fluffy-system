@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='900'>
+<rect width='1400' height='900' fill='#1a2330'/>
+<text x='50' y='56' fill='white' font-size='36'>角色画面设定板（可用于像素美术对照）</text>
+<g transform='translate(60,120)'><rect width='290' height='330' fill='#2f3e51'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7ea07f'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>青岚师姐（严谨）</text><text x='20' y='308' fill='#b9d5ee'>爱好：种药</text></g>
+<g transform='translate(390,120)'><rect width='290' height='330' fill='#3d3248'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7f6aa8'/><line x1='128' y1='74' x2='162' y2='102' stroke='#ff8fa1' stroke-width='4'/><line x1='162' y1='74' x2='128' y2='102' stroke='#ff8fa1' stroke-width='4'/><text x='20' y='280' fill='#f6eaff' font-size='22'>夜魇魔尊（悲情反派）</text><text x='20' y='308' fill='#d8bfe7'>标签：血月旧案</text></g>
+<g transform='translate(720,120)'><rect width='290' height='330' fill='#324450'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#6e7a8f'/><rect x='137' y='68' width='16' height='16' fill='#9de8ff'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>白长歌（寡言）</text><text x='20' y='308' fill='#b9d5ee'>爱好：观星</text></g>
+<g transform='translate(1050,120)'><rect width='290' height='330' fill='#4a3f32'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#b07a55'/><circle cx='145' cy='72' r='6' fill='#ffd77a'/><text x='20' y='280' fill='#fff3e8' font-size='22'>洪九掌柜（豪迈）</text><text x='20' y='308' fill='#ecd5bd'>爱好：酿酒</text></g>
+</svg>
