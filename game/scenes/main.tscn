@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/environment_fx.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/feedback_layer.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/skeleton_guide.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/adventure_spot.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/entrance_gate.gd" id="11"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1")
@@ -81,6 +83,106 @@ position = Vector2(520, 188)
 script = ExtResource("4")
 npc_name = "青岚师姐"
 
+
+[node name="JuniorBrother" type="Node2D" parent="."]
+position = Vector2(610, 250)
+script = ExtResource("4")
+npc_name = "陆小川师弟"
+title = "外门弟子"
+faction = "青岚宗"
+archetype = "junior"
+
+[node name="Master" type="Node2D" parent="."]
+position = Vector2(560, 110)
+script = ExtResource("4")
+npc_name = "玄尘师父"
+title = "掌峰"
+faction = "青岚宗"
+archetype = "elder"
+
+[node name="UncleMaster" type="Node2D" parent="."]
+position = Vector2(700, 170)
+script = ExtResource("4")
+npc_name = "松鹤师叔"
+title = "巡山长老"
+faction = "青岚宗"
+archetype = "uncle_master"
+
+[node name="DemonLord" type="Node2D" parent="."]
+position = Vector2(770, 330)
+script = ExtResource("4")
+npc_name = "夜魇魔尊"
+title = "魔门之主"
+faction = "幽冥殿"
+archetype = "demon_lord"
+
+[node name="WudangGuest" type="Node2D" parent="."]
+position = Vector2(890, 210)
+script = ExtResource("4")
+npc_name = "清虚道人"
+title = "武当来使"
+faction = "太和武当"
+archetype = "faction_guest"
+nation = "太和国"
+required_language = "太和官话"
+
+[node name="EmeiGuest" type="Node2D" parent="."]
+position = Vector2(970, 300)
+script = ExtResource("4")
+npc_name = "静华师太"
+title = "峨眉来使"
+faction = "锦绣峨眉"
+archetype = "faction_guest"
+nation = "蜀锦国"
+required_language = "蜀锦方言"
+
+[node name="BeggarGuest" type="Node2D" parent="."]
+position = Vector2(860, 390)
+script = ExtResource("4")
+npc_name = "洪九掌柜"
+title = "丐帮游侠"
+faction = "丐帮"
+archetype = "faction_guest"
+personality = "豪迈"
+hobby = "酿酒"
+nation = "江湖流民"
+required_language = "江湖切口"
+
+[node name="TangGuest" type="Node2D" parent="."]
+position = Vector2(760, 250)
+script = ExtResource("4")
+npc_name = "唐镜离"
+title = "蜀中来使"
+faction = "唐门"
+archetype = "faction_guest"
+personality = "狡黠"
+hobby = "机关"
+nation = "蜀唐国"
+required_language = "蜀唐密语"
+
+[node name="KunlunGuest" type="Node2D" parent="."]
+position = Vector2(980, 170)
+script = ExtResource("4")
+npc_name = "白长歌"
+title = "昆仑剑修"
+faction = "昆仑"
+archetype = "faction_guest"
+personality = "寡言"
+hobby = "观星"
+nation = "昆仑雪国"
+required_language = "昆仑古语"
+
+[node name="MedicineNun" type="Node2D" parent="."]
+position = Vector2(640, 360)
+script = ExtResource("4")
+npc_name = "素问"
+title = "药庐执事"
+faction = "青岚宗"
+archetype = "mentor"
+personality = "严谨"
+hobby = "辨药"
+profession = "医师"
+
 [node name="CliffHerb" type="Node2D" parent="."]
 position = Vector2(130, 300)
 script = ExtResource("5")
@@ -88,6 +190,176 @@ script = ExtResource("5")
 [node name="SkeletonGuide" type="Node2D" parent="."]
 position = Vector2(420, 360)
 script = ExtResource("9")
+
+
+[node name="SpiritSpring" type="Node2D" parent="."]
+position = Vector2(1040, 120)
+script = ExtResource("10")
+spot_name = "听雨潭"
+mode = "spring"
+
+[node name="Arena" type="Node2D" parent="."]
+position = Vector2(1080, 430)
+script = ExtResource("10")
+spot_name = "演武坪"
+mode = "arena"
+
+[node name="AncientRuins" type="Node2D" parent="."]
+position = Vector2(180, 520)
+script = ExtResource("10")
+spot_name = "残碑遗墟"
+mode = "ruins"
+
+[node name="CliffEdge" type="Node2D" parent="."]
+position = Vector2(90, 430)
+script = ExtResource("10")
+spot_name = "断云崖"
+mode = "cliff"
+
+[node name="SecretRealmGate" type="Node2D" parent="."]
+position = Vector2(1180, 220)
+script = ExtResource("10")
+spot_name = "裂隙秘境"
+mode = "secret_realm"
+
+[node name="LoggingCamp" type="Node2D" parent="."]
+position = Vector2(1120, 560)
+script = ExtResource("10")
+spot_name = "伐木地"
+mode = "logging"
+
+[node name="DiggingPit" type="Node2D" parent="."]
+position = Vector2(260, 620)
+script = ExtResource("10")
+spot_name = "掘洞口"
+mode = "digging"
+
+[node name="StoneTablet" type="Node2D" parent="."]
+position = Vector2(350, 500)
+script = ExtResource("10")
+spot_name = "刻字石"
+mode = "carving"
+
+[node name="UndergroundEntry" type="Node2D" parent="."]
+position = Vector2(1240, 620)
+script = ExtResource("10")
+spot_name = "幽穴入口"
+mode = "underground"
+
+[node name="DivineBonePit" type="Node2D" parent="."]
+position = Vector2(1020, 660)
+script = ExtResource("10")
+spot_name = "神骸古坑"
+mode = "divine_bones"
+
+[node name="GhostNpc" type="Node2D" parent="."]
+position = Vector2(1160, 620)
+script = ExtResource("4")
+npc_name = "雾灯女鬼"
+title = "游魂"
+faction = "无归之地"
+archetype = "ghost"
+personality = "寡言"
+hobby = "旧谣"
+nation = "无归冥境"
+required_language = "冥语"
+
+[node name="MonsterNpc" type="Node2D" parent="."]
+position = Vector2(980, 600)
+script = ExtResource("4")
+npc_name = "魈山獠"
+title = "山魈"
+faction = "北岭妖群"
+archetype = "monster"
+personality = "豪迈"
+hobby = "守约"
+nation = "北岭妖群"
+required_language = "兽灵语"
+
+[node name="HunterNpc" type="Node2D" parent="."]
+position = Vector2(1090, 610)
+script = ExtResource("4")
+npc_name = "韩猎尘"
+title = "山径向导"
+faction = "青岚宗"
+archetype = "mentor"
+personality = "豪迈"
+hobby = "观迹"
+profession = "猎户"
+nation = "中州"
+required_language = "中州雅言"
+
+[node name="ArtisanNpc" type="Node2D" parent="."]
+position = Vector2(820, 580)
+script = ExtResource("4")
+npc_name = "鲁百锻"
+title = "作坊主事"
+faction = "青岚宗"
+archetype = "mentor"
+personality = "严谨"
+hobby = "锻造"
+profession = "匠人"
+nation = "中州"
+required_language = "中州雅言"
+
+[node name="VendorNpc" type="Node2D" parent="."]
+position = Vector2(930, 360)
+script = ExtResource("4")
+npc_name = "柳算盘"
+title = "集市摊主"
+faction = "散修商会"
+archetype = "faction_guest"
+personality = "狡黠"
+hobby = "砍价"
+profession = "小贩"
+nation = "中州"
+required_language = "中州雅言"
+
+[node name="SwordImmortal" type="Node2D" parent="."]
+position = Vector2(520, 90)
+script = ExtResource("4")
+npc_name = "玄霄剑仙"
+title = "云游剑仙"
+faction = "太虚天宫"
+archetype = "immortal"
+personality = "寡言"
+hobby = "观云"
+profession = "仙人"
+nation = "天外仙域"
+required_language = "中州雅言"
+
+[node name="PillImmortal" type="Node2D" parent="."]
+position = Vector2(1010, 130)
+script = ExtResource("4")
+npc_name = "丹霞上人"
+title = "炼丹仙客"
+faction = "丹霞福地"
+archetype = "immortal"
+personality = "严谨"
+hobby = "炼丹"
+profession = "仙人"
+nation = "丹霞福地"
+required_language = "中州雅言"
+
+[node name="CraneImmortal" type="Node2D" parent="."]
+position = Vector2(190, 470)
+script = ExtResource("4")
+npc_name = "白鹤散仙"
+title = "鹤背来客"
+faction = "海外三山"
+archetype = "immortal"
+personality = "豪迈"
+hobby = "抚琴"
+profession = "仙人"
+nation = "海外三山"
+required_language = "中州雅言"
+
+
+[node name="MainEntrance" type="Node2D" parent="."]
+position = Vector2(640, 694)
+script = ExtResource("11")
+gate_name = "山门入口"
+target_position = Vector2(640, 430)
 
 [node name="UI" type="CanvasLayer" parent="."]
 script = ExtResource("6")
