@@ -1,8 +1,76 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='900'>
-<rect width='1400' height='900' fill='#1a2330'/>
-<text x='50' y='56' fill='white' font-size='36'>角色画面设定板（可用于像素美术对照）</text>
-<g transform='translate(60,120)'><rect width='290' height='330' fill='#2f3e51'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7ea07f'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>青岚师姐（严谨）</text><text x='20' y='308' fill='#b9d5ee'>爱好：种药</text></g>
-<g transform='translate(390,120)'><rect width='290' height='330' fill='#3d3248'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7f6aa8'/><line x1='128' y1='74' x2='162' y2='102' stroke='#ff8fa1' stroke-width='4'/><line x1='162' y1='74' x2='128' y2='102' stroke='#ff8fa1' stroke-width='4'/><text x='20' y='280' fill='#f6eaff' font-size='22'>夜魇魔尊（悲情反派）</text><text x='20' y='308' fill='#d8bfe7'>标签：血月旧案</text></g>
-<g transform='translate(720,120)'><rect width='290' height='330' fill='#324450'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#6e7a8f'/><rect x='137' y='68' width='16' height='16' fill='#9de8ff'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>白长歌（寡言）</text><text x='20' y='308' fill='#b9d5ee'>爱好：观星</text></g>
-<g transform='translate(1050,120)'><rect width='290' height='330' fill='#4a3f32'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#b07a55'/><circle cx='145' cy='72' r='6' fill='#ffd77a'/><text x='20' y='280' fill='#fff3e8' font-size='22'>洪九掌柜（豪迈）</text><text x='20' y='308' fill='#ecd5bd'>爱好：酿酒</text></g>
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='980' viewBox='0 0 1600 980' role='img' aria-label='角色半身像分组参考图'>
+  <defs>
+    <style>
+      .title { fill:#ffffff; font-size:44px; font-weight:700; }
+      .section { fill:#1a2f45; font-size:38px; font-weight:700; }
+      .name { fill:#244c71; font-size:30px; font-weight:700; }
+      .tag { fill:#5e84a9; font-size:22px; }
+      .cardName { fill:#ffffff; font-size:36px; font-weight:700; }
+      .cardTag { fill:#d5e4f4; font-size:24px; }
+    </style>
+  </defs>
+
+  <rect width='1600' height='980' fill='#9bcbe6'/>
+  <rect y='0' width='1600' height='340' fill='#1f3041'/>
+  <text x='24' y='58' class='title'>角色立绘参考（半身像风格）</text>
+
+  <!-- Top feature cards: portrait bust style -->
+  <g transform='translate(36,92)'>
+    <rect width='370' height='228' fill='#334b63'/>
+    <circle cx='186' cy='86' r='44' fill='#efddc6'/>
+    <path d='M146 78 Q186 32 226 78 L226 94 Q186 72 146 94 Z' fill='#5a3a2d'/>
+    <rect x='132' y='122' width='108' height='86' rx='18' fill='#6fa077'/>
+    <text x='28' y='186' class='cardName'>青岚师姐</text>
+    <text x='28' y='216' class='cardTag'>严谨 / 神药研究</text>
+  </g>
+  <g transform='translate(426,92)'>
+    <rect width='370' height='228' fill='#4a3954'/>
+    <circle cx='186' cy='86' r='44' fill='#efd9c5'/>
+    <path d='M142 84 Q186 26 230 84 L230 104 Q186 62 142 104 Z' fill='#40254f'/>
+    <rect x='132' y='122' width='108' height='86' rx='18' fill='#7f69aa'/>
+    <path d='M152 48 L166 34 L174 48 Z' fill='#ff8da3'/><path d='M198 48 L212 34 L220 48 Z' fill='#ff8da3'/>
+    <text x='28' y='186' class='cardName'>夜魇魔尊</text>
+    <text x='28' y='216' class='cardTag'>悲情反派 / 血月旧案</text>
+  </g>
+  <g transform='translate(816,92)'>
+    <rect width='370' height='228' fill='#375167'/>
+    <circle cx='186' cy='86' r='44' fill='#efdfc8'/>
+    <path d='M146 82 Q186 38 226 82 L226 98 Q186 70 146 98 Z' fill='#2a3447'/>
+    <rect x='132' y='122' width='108' height='86' rx='18' fill='#73839a'/>
+    <rect x='158' y='68' width='56' height='16' fill='#9de8ff'/>
+    <text x='28' y='186' class='cardName'>白长歌</text>
+    <text x='28' y='216' class='cardTag'>寡言 / 观星</text>
+  </g>
+  <g transform='translate(1206,92)'>
+    <rect width='358' height='228' fill='#5c4a36'/>
+    <circle cx='180' cy='86' r='44' fill='#f0deca'/>
+    <path d='M140 82 Q180 40 220 82 L220 98 Q180 70 140 98 Z' fill='#603f2b'/>
+    <rect x='126' y='122' width='108' height='86' rx='18' fill='#b27f58'/>
+    <rect x='164' y='58' width='32' height='14' fill='#f6d676'/>
+    <text x='28' y='186' class='cardName'>洪九掌柜</text>
+    <text x='28' y='216' class='cardTag'>豪迈 / 酿酒</text>
+  </g>
+
+  <text x='30' y='394' class='section'>可结缘角色（头像版）</text>
+  <rect x='24' y='408' width='1550' height='4' fill='#a8cde5'/>
+
+  <!-- Row 1 -->
+  <g transform='translate(42,440)'>
+    <g transform='translate(0,0)'><circle cx='58' cy='48' r='42' fill='#e7c7a8'/><path d='M22 42 Q58 4 94 42 L94 56 Q58 40 22 56 Z' fill='#7d4a2d'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#4f9a45'/><text x='12' y='164' class='name'>亚力克斯</text></g>
+    <g transform='translate(170,0)'><circle cx='58' cy='48' r='42' fill='#e7c6a8'/><path d='M16 42 Q58 -2 100 42 L100 56 Q58 36 16 56 Z' fill='#b56a2e'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#8b2f42'/><text x='18' y='164' class='name'>艾利欧特</text></g>
+    <g transform='translate(340,0)'><circle cx='58' cy='48' r='42' fill='#d4a689'/><path d='M18 42 Q58 8 98 42 L98 58 Q58 42 18 58 Z' fill='#3d2a2a'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#2f6f56'/><text x='30' y='164' class='name'>哈维</text></g>
+    <g transform='translate(510,0)'><circle cx='58' cy='48' r='42' fill='#efc190'/><path d='M20 42 Q58 2 96 42 L96 58 Q58 38 20 58 Z' fill='#f0ba49'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#4f87dd'/><text x='30' y='164' class='name'>山姆</text></g>
+    <g transform='translate(680,0)'><circle cx='58' cy='48' r='42' fill='#e8c6b8'/><path d='M14 44 Q58 2 102 44 L102 60 Q58 40 14 60 Z' fill='#2f2d5c'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#3b3a52'/><text x='2' y='164' class='name'>塞巴斯蒂安</text></g>
+    <g transform='translate(850,0)'><circle cx='58' cy='48' r='42' fill='#e0b7a5'/><path d='M18 42 Q58 10 98 42 L98 58 Q58 42 18 58 Z' fill='#6d4357'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#4a87af'/><text x='36' y='164' class='name'>谢恩</text></g>
+  </g>
+
+  <!-- Row 2 -->
+  <g transform='translate(42,668)'>
+    <g transform='translate(0,0)'><circle cx='58' cy='48' r='42' fill='#e9c8bc'/><path d='M16 44 Q58 0 100 44 L100 58 Q58 38 16 58 Z' fill='#7b58bb'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#3f5e85'/><text x='12' y='164' class='name'>阿比盖尔</text></g>
+    <g transform='translate(170,0)'><circle cx='58' cy='48' r='42' fill='#efc8ad'/><path d='M20 44 Q58 4 96 44 L96 58 Q58 38 20 58 Z' fill='#2585e1'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#cc3432'/><text x='24' y='164' class='name'>艾米丽</text></g>
+    <g transform='translate(340,0)'><circle cx='58' cy='48' r='42' fill='#f1cfb1'/><path d='M14 42 Q58 0 102 42 L102 56 Q58 34 14 56 Z' fill='#ffd84f'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#5ea5eb'/><text x='36' y='164' class='name'>海莉</text></g>
+    <g transform='translate(510,0)'><circle cx='58' cy='48' r='42' fill='#f0cfb7'/><path d='M18 42 Q58 4 98 42 L98 58 Q58 36 18 58 Z' fill='#cd7044'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#6cb06d'/><text x='36' y='164' class='name'>莉亚</text></g>
+    <g transform='translate(680,0)'><circle cx='58' cy='48' r='42' fill='#a96d63'/><path d='M16 44 Q58 10 100 44 L100 58 Q58 40 16 58 Z' fill='#5a2d39'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#7652aa'/><text x='36' y='164' class='name'>玛鲁</text></g>
+    <g transform='translate(850,0)'><circle cx='58' cy='48' r='42' fill='#f1cfb0'/><path d='M18 44 Q58 4 98 44 L98 58 Q58 36 18 58 Z' fill='#cb884a'/><rect x='16' y='86' width='84' height='40' rx='14' fill='#f2cc5a'/><text x='36' y='164' class='name'>潘妮</text></g>
+  </g>
 </svg>
