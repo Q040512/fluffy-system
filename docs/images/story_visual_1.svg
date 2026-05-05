@@ -1,3 +1,36 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-label='青岚山晨景细节马赛克示意图' shape-rendering='crispEdges'>
+  <defs>
+    <style>
+      .title { fill: #f7f3d2; font-size: 34px; font-weight: 700; }
+      .subtitle { fill: #c9e6ca; font-size: 20px; }
+      .label { fill: #ecf6ff; font-size: 18px; }
+      .note { fill: #ffd98e; font-size: 14px; }
+    </style>
+    <pattern id='grass' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#3ea43f'/><rect width='4' height='4' fill='#59bb58'/><rect x='8' y='4' width='4' height='4' fill='#2f8e31'/><rect x='4' y='12' width='4' height='4' fill='#2b7a2d'/><rect x='12' y='10' width='4' height='4' fill='#4db14f'/>
+    </pattern>
+    <pattern id='road' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#c99e57'/><rect x='4' y='2' width='4' height='4' fill='#b88d48'/><rect x='10' y='8' width='4' height='4' fill='#ddb676'/><rect x='0' y='10' width='4' height='4' fill='#a97e3e'/>
+    </pattern>
+    <pattern id='water' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#4c94b8'/><rect x='2' y='2' width='4' height='4' fill='#62add2'/><rect x='8' y='10' width='4' height='4' fill='#3b7fa6'/>
+    </pattern>
+  </defs>
+
+  <rect width='1280' height='720' fill='#2b6c2d'/><rect x='0' y='120' width='1280' height='600' fill='url(#grass)'/>
+  <rect x='0' y='540' width='1280' height='180' fill='url(#road)' opacity='0.42'/>
+  <path d='M930 80 L1120 80 L1210 220 L1110 360 L930 360 L860 220 Z' fill='url(#water)'/>
+  <rect x='40' y='28' width='730' height='80' fill='#1c3d1e' stroke='#9be27e' stroke-width='4'/>
+  <text x='56' y='62' class='title'>青岚山晨景（细节马赛克）</text><text x='56' y='90' class='subtitle'>宗门、灵田、秘境、演武坪的动线分层</text>
+  <rect x='150' y='170' width='320' height='250' fill='#6c583d' stroke='#4a3929' stroke-width='6'/><rect x='166' y='186' width='290' height='220' fill='url(#road)' opacity='0.35'/>
+  <rect x='500' y='160' width='210' height='220' fill='#5f7b96' stroke='#384a5f' stroke-width='6'/><rect x='516' y='176' width='178' height='188' fill='url(#grass)' opacity='0.18'/>
+  <rect x='745' y='170' width='270' height='200' fill='#5b715d' stroke='#3f513f' stroke-width='6'/><rect x='762' y='186' width='236' height='168' fill='url(#road)' opacity='0.22'/>
+  <rect x='92' y='490' width='220' height='130' fill='#4e566d' stroke='#31384d' stroke-width='6'/>
+  <rect x='510' y='180' width='18' height='18' fill='#ffd37c'/><text x='536' y='194' class='label'>青岚师姐</text><text x='536' y='212' class='note'>宗门引导</text>
+  <rect x='748' y='318' width='18' height='18' fill='#ff9ba5'/><text x='774' y='332' class='label'>夜魇魔尊</text><text x='774' y='350' class='note'>剧情冲突</text>
+  <rect x='1062' y='418' width='18' height='18' fill='#71d7ff'/><text x='1088' y='432' class='label'>演武坪</text><text x='1088' y='450' class='note'>战斗教学</text>
+  <rect x='1138' y='214' width='18' height='18' fill='#c9b5ff'/><text x='1164' y='228' class='label'>裂隙秘境</text><text x='1164' y='246' class='note'>中后期开启</text>
+</svg>
 <svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-label='青岚山晨景像素风视觉示意图' shape-rendering='crispEdges'>
   <defs>
     <style>
