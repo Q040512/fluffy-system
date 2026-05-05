@@ -42,9 +42,9 @@ func _process(delta: float) -> void:
 	else:
 		var idle_anim := "meditate" if _is_meditating_visual else "idle_%s" % direction_name
 		_play_state_animation(idle_anim)
-	if Input.is_action_just_pressed("interact"):
+	if game != null and Input.is_action_just_pressed("interact"):
 		game.try_interact(global_position + facing * 28.0)
-	if Input.is_action_just_pressed("meditate"):
+	if game != null and Input.is_action_just_pressed("meditate"):
 		game.meditate()
 	queue_redraw()
 
