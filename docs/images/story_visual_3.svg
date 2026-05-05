@@ -1,10 +1,73 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'>
-<rect width='1280' height='720' fill='#18262c'/><rect y='120' width='1280' height='600' fill='#27434e'/>
-<text x='40' y='44' fill='white' font-size='30'>日常与突发事件（视觉示意）</text>
-<text x='40' y='80' fill='#d8e8f4' font-size='20'>每天有日常事件，并可能触发突发事件</text>
-<rect x='860' y='20' width='380' height='200' fill='none' stroke='#b9d1e8' stroke-width='2'/>
-<text x='885' y='60' fill='#e7f2ff' font-size='24'>UI消息日志</text>
-<text x='885' y='95' fill='#d3e5f9' font-size='18'>【日常】外门晨课：点名吐纳</text>
-<text x='885' y='125' fill='#d3e5f9' font-size='18'>【突发】夜半失火：抢救仓房</text>
-<text x='885' y='155' fill='#d3e5f9' font-size='18'>【后续】剑帖再现：黑市争夺</text>
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-label='像素风日常与突发事件示意图' shape-rendering='crispEdges'>
+  <defs>
+    <style>
+      .title { fill: #f8f8d8; font-size: 34px; font-weight: 700; }
+      .subtitle { fill: #d6f0cf; font-size: 20px; }
+      .panelTitle { fill: #ffffff; font-size: 24px; font-weight: 700; }
+      .eventText { fill: #f4f4f4; font-size: 19px; }
+      .timeText { fill: #ffe7a3; font-size: 15px; }
+      .tagText { fill: #2b1d0e; font-size: 14px; font-weight: 700; }
+    </style>
+    <pattern id='grassNoise' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#41a63f'/>
+      <rect x='0' y='0' width='4' height='4' fill='#4eb24b'/>
+      <rect x='8' y='4' width='4' height='4' fill='#328b31'/>
+      <rect x='4' y='12' width='4' height='4' fill='#2f7e2e'/>
+      <rect x='12' y='10' width='4' height='4' fill='#57b954'/>
+    </pattern>
+    <pattern id='pathNoise' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#c8a05a'/>
+      <rect x='4' y='0' width='4' height='4' fill='#b68e4a'/>
+      <rect x='10' y='6' width='4' height='4' fill='#d6b06e'/>
+      <rect x='0' y='10' width='4' height='4' fill='#ac8343'/>
+      <rect x='8' y='12' width='4' height='4' fill='#ddb87a'/>
+    </pattern>
+    <pattern id='waterNoise' width='16' height='16' patternUnits='userSpaceOnUse'>
+      <rect width='16' height='16' fill='#4b90b5'/>
+      <rect x='2' y='2' width='4' height='4' fill='#62a5c7'/>
+      <rect x='10' y='5' width='4' height='4' fill='#3b7ca3'/>
+      <rect x='6' y='10' width='4' height='4' fill='#71b7d8'/>
+    </pattern>
+  </defs>
+
+  <rect width='1280' height='720' fill='#2a6b2d'/>
+  <rect x='0' y='120' width='1280' height='600' fill='url(#grassNoise)'/>
+
+  <rect x='0' y='560' width='1280' height='160' fill='url(#pathNoise)' opacity='0.45'/>
+  <path d='M860 120 L980 120 L1120 360 L980 720 L860 720 L760 360 Z' fill='url(#waterNoise)'/>
+  <path d='M850 120 L870 120 L750 360 L850 720 L830 720 L710 360 Z' fill='#d39e43'/>
+  <path d='M1120 120 L1140 120 L1020 360 L1140 720 L1120 720 L1000 360 Z' fill='#d39e43'/>
+
+  <rect x='40' y='28' width='720' height='78' fill='#1d3f1e' stroke='#9be27e' stroke-width='4'/>
+  <text x='58' y='62' class='title'>日常与突发事件（像素风示意）</text>
+  <text x='58' y='90' class='subtitle'>日常推进时可能触发突发剧情，形成连续事件链</text>
+
+  <rect x='808' y='24' width='444' height='262' fill='#2a2f55' stroke='#a9c4ff' stroke-width='4'/>
+  <rect x='830' y='44' width='100' height='30' fill='#f1c26e' stroke='#8b5d24' stroke-width='3'/>
+  <text x='848' y='64' class='tagText'>消息日志</text>
+  <text x='832' y='106' class='panelTitle'>UI 事件流</text>
+
+  <rect x='854' y='130' width='6' height='112' fill='#79a8ff'/>
+
+  <rect x='846' y='142' width='20' height='20' fill='#71d7ff' stroke='#1c4f6d' stroke-width='2'/>
+  <text x='878' y='158' class='eventText'>【日常】外门晨课：点名吐纳</text>
+  <text x='1092' y='158' class='timeText'>辰时</text>
+
+  <rect x='846' y='176' width='20' height='20' fill='#ffd37c' stroke='#7a5720' stroke-width='2'/>
+  <text x='878' y='192' class='eventText'>【突发】夜半失火：抢救仓房</text>
+  <text x='1092' y='192' class='timeText'>子时</text>
+
+  <rect x='846' y='210' width='20' height='20' fill='#ff9ba5' stroke='#6c2730' stroke-width='2'/>
+  <text x='878' y='226' class='eventText'>【后续】剑帖再现：黑市争夺</text>
+  <text x='1092' y='226' class='timeText'>次日</text>
+
+  <rect x='120' y='200' width='190' height='120' fill='#3a7e36' stroke='#173d1a' stroke-width='4'/>
+  <rect x='320' y='210' width='220' height='140' fill='#4a8c42' stroke='#173d1a' stroke-width='4'/>
+  <rect x='160' y='350' width='260' height='170' fill='#c3a46a' stroke='#6d5433' stroke-width='6'/>
+  <rect x='188' y='378' width='204' height='114' fill='#af8c54' stroke='#7a613a' stroke-width='4'/>
+  <rect x='180' y='540' width='500' height='70' fill='#b1925d' stroke='#6d5433' stroke-width='5'/>
+
+  <rect x='90' y='610' width='140' height='90' fill='#4c75b5' stroke='#22385d' stroke-width='4'/>
+  <rect x='350' y='612' width='160' height='90' fill='#b77e54' stroke='#5b3a27' stroke-width='4'/>
+  <rect x='970' y='590' width='180' height='112' fill='#7a5d44' stroke='#3f2b1f' stroke-width='4'/>
 </svg>
