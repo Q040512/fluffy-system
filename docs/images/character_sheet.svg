@@ -1,8 +1,71 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='900'>
-<rect width='1400' height='900' fill='#1a2330'/>
-<text x='50' y='56' fill='white' font-size='36'>角色画面设定板（可用于像素美术对照）</text>
-<g transform='translate(60,120)'><rect width='290' height='330' fill='#2f3e51'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7ea07f'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>青岚师姐（严谨）</text><text x='20' y='308' fill='#b9d5ee'>爱好：种药</text></g>
-<g transform='translate(390,120)'><rect width='290' height='330' fill='#3d3248'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#7f6aa8'/><line x1='128' y1='74' x2='162' y2='102' stroke='#ff8fa1' stroke-width='4'/><line x1='162' y1='74' x2='128' y2='102' stroke='#ff8fa1' stroke-width='4'/><text x='20' y='280' fill='#f6eaff' font-size='22'>夜魇魔尊（悲情反派）</text><text x='20' y='308' fill='#d8bfe7'>标签：血月旧案</text></g>
-<g transform='translate(720,120)'><rect width='290' height='330' fill='#324450'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#6e7a8f'/><rect x='137' y='68' width='16' height='16' fill='#9de8ff'/><text x='20' y='280' fill='#eaf4ff' font-size='22'>白长歌（寡言）</text><text x='20' y='308' fill='#b9d5ee'>爱好：观星</text></g>
-<g transform='translate(1050,120)'><rect width='290' height='330' fill='#4a3f32'/><circle cx='145' cy='90' r='36' fill='#ead8c0'/><rect x='115' y='126' width='60' height='110' fill='#b07a55'/><circle cx='145' cy='72' r='6' fill='#ffd77a'/><text x='20' y='280' fill='#fff3e8' font-size='22'>洪九掌柜（豪迈）</text><text x='20' y='308' fill='#ecd5bd'>爱好：酿酒</text></g>
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='700' viewBox='0 0 1600 700' role='img' aria-label='武侠仙侠低分辨率像素角色设定板' shape-rendering='crispEdges'>
+  <defs>
+    <style>
+      .title { fill:#f6f6ef; font-size:54px; font-weight:700; }
+      .name { fill:#f0f3ff; font-size:38px; font-weight:700; }
+      .desc { fill:#c9d8f2; font-size:28px; }
+      .accent { fill:#ffb3c8; font-size:28px; }
+    </style>
+  </defs>
+
+  <rect width='1600' height='700' fill='#131d2c'/>
+  <rect x='20' y='20' width='1560' height='660' fill='#1b2a3d' stroke='#324b6f' stroke-width='4'/>
+  <text x='34' y='76' class='title'>宗门角色设定板（武侠仙侠复古像素）</text>
+
+  <g transform='translate(44,126)'>
+    <rect width='340' height='390' fill='#304865'/>
+    <g transform='translate(116,62)'>
+      <rect x='32' y='0' width='8' height='8' fill='#e9d7be'/><rect x='40' y='0' width='8' height='8' fill='#e9d7be'/><rect x='48' y='0' width='8' height='8' fill='#e9d7be'/><rect x='56' y='0' width='8' height='8' fill='#e9d7be'/>
+      <rect x='24' y='8' width='8' height='8' fill='#e9d7be'/><rect x='32' y='8' width='8' height='8' fill='#e9d7be'/><rect x='40' y='8' width='8' height='8' fill='#e9d7be'/><rect x='48' y='8' width='8' height='8' fill='#e9d7be'/><rect x='56' y='8' width='8' height='8' fill='#e9d7be'/><rect x='64' y='8' width='8' height='8' fill='#e9d7be'/>
+      <rect x='24' y='16' width='8' height='8' fill='#e9d7be'/><rect x='32' y='16' width='8' height='8' fill='#e9d7be'/><rect x='40' y='16' width='8' height='8' fill='#e9d7be'/><rect x='48' y='16' width='8' height='8' fill='#e9d7be'/><rect x='56' y='16' width='8' height='8' fill='#e9d7be'/><rect x='64' y='16' width='8' height='8' fill='#e9d7be'/>
+      <rect x='20' y='0' width='8' height='8' fill='#3e2d23'/><rect x='68' y='0' width='8' height='8' fill='#3e2d23'/>
+      <rect x='28' y='40' width='40' height='72' fill='#83a987'/><rect x='20' y='80' width='8' height='16' fill='#d4e0c6'/><rect x='68' y='80' width='8' height='16' fill='#d4e0c6'/>
+      <rect x='20' y='112' width='24' height='56' fill='#3b4f6b'/><rect x='52' y='112' width='24' height='56' fill='#3b4f6b'/>
+      <rect x='76' y='84' width='18' height='6' fill='#9fe3ff'/>
+    </g>
+    <text x='24' y='322' class='name'>青岚师姐（药峰）</text>
+    <text x='24' y='356' class='desc'>爱好：炼药 / 观脉</text>
+  </g>
+
+  <g transform='translate(424,126)'>
+    <rect width='340' height='390' fill='#483758'/>
+    <g transform='translate(116,62)'>
+      <rect x='32' y='0' width='8' height='8' fill='#ecd9bf'/><rect x='40' y='0' width='8' height='8' fill='#ecd9bf'/><rect x='48' y='0' width='8' height='8' fill='#ecd9bf'/><rect x='56' y='0' width='8' height='8' fill='#ecd9bf'/>
+      <rect x='24' y='8' width='8' height='8' fill='#ecd9bf'/><rect x='32' y='8' width='8' height='8' fill='#ecd9bf'/><rect x='40' y='8' width='8' height='8' fill='#ecd9bf'/><rect x='48' y='8' width='8' height='8' fill='#ecd9bf'/><rect x='56' y='8' width='8' height='8' fill='#ecd9bf'/><rect x='64' y='8' width='8' height='8' fill='#ecd9bf'/>
+      <rect x='24' y='16' width='8' height='8' fill='#ecd9bf'/><rect x='32' y='16' width='8' height='8' fill='#ecd9bf'/><rect x='40' y='16' width='8' height='8' fill='#ecd9bf'/><rect x='48' y='16' width='8' height='8' fill='#ecd9bf'/><rect x='56' y='16' width='8' height='8' fill='#ecd9bf'/><rect x='64' y='16' width='8' height='8' fill='#ecd9bf'/>
+      <rect x='30' y='10' width='8' height='8' fill='#ff8faa'/><rect x='58' y='10' width='8' height='8' fill='#ff8faa'/>
+      <rect x='28' y='40' width='40' height='72' fill='#7f6aa8'/><rect x='24' y='54' width='4' height='36' fill='#d2b9ff'/><rect x='68' y='54' width='4' height='36' fill='#d2b9ff'/>
+      <rect x='20' y='112' width='24' height='56' fill='#433b66'/><rect x='52' y='112' width='24' height='56' fill='#433b66'/>
+      <rect x='6' y='68' width='14' height='6' fill='#ff516f'/>
+    </g>
+    <text x='24' y='322' class='name'>夜魇魔尊（魔门）</text>
+    <text x='24' y='356' class='desc'>标签：<tspan class='accent'>血月旧案 / 心魔</tspan></text>
+  </g>
+
+  <g transform='translate(804,126)'>
+    <rect width='340' height='390' fill='#334b61'/>
+    <g transform='translate(116,62)'>
+      <rect x='32' y='0' width='8' height='8' fill='#e7d6bd'/><rect x='40' y='0' width='8' height='8' fill='#e7d6bd'/><rect x='48' y='0' width='8' height='8' fill='#e7d6bd'/><rect x='56' y='0' width='8' height='8' fill='#e7d6bd'/>
+      <rect x='24' y='8' width='8' height='8' fill='#e7d6bd'/><rect x='32' y='8' width='8' height='8' fill='#e7d6bd'/><rect x='40' y='8' width='8' height='8' fill='#e7d6bd'/><rect x='48' y='8' width='8' height='8' fill='#e7d6bd'/><rect x='56' y='8' width='8' height='8' fill='#e7d6bd'/><rect x='64' y='8' width='8' height='8' fill='#e7d6bd'/>
+      <rect x='24' y='16' width='8' height='8' fill='#e7d6bd'/><rect x='32' y='16' width='8' height='8' fill='#e7d6bd'/><rect x='40' y='16' width='8' height='8' fill='#e7d6bd'/><rect x='48' y='16' width='8' height='8' fill='#e7d6bd'/><rect x='56' y='16' width='8' height='8' fill='#e7d6bd'/><rect x='64' y='16' width='8' height='8' fill='#e7d6bd'/>
+      <rect x='44' y='4' width='8' height='8' fill='#77cbe5'/><rect x='28' y='40' width='40' height='72' fill='#73839a'/><rect x='20' y='112' width='24' height='56' fill='#344766'/><rect x='52' y='112' width='24' height='56' fill='#344766'/>
+      <rect x='6' y='78' width='14' height='6' fill='#a8ebff'/><rect x='86' y='78' width='14' height='6' fill='#a8ebff'/>
+    </g>
+    <text x='24' y='322' class='name'>白长歌（剑修）</text>
+    <text x='24' y='356' class='desc'>爱好：观星 / 问剑</text>
+  </g>
+
+  <g transform='translate(1184,126)'>
+    <rect width='340' height='390' fill='#5b4a35'/>
+    <g transform='translate(116,62)'>
+      <rect x='32' y='0' width='8' height='8' fill='#e9d8c0'/><rect x='40' y='0' width='8' height='8' fill='#e9d8c0'/><rect x='48' y='0' width='8' height='8' fill='#e9d8c0'/><rect x='56' y='0' width='8' height='8' fill='#e9d8c0'/>
+      <rect x='24' y='8' width='8' height='8' fill='#e9d8c0'/><rect x='32' y='8' width='8' height='8' fill='#e9d8c0'/><rect x='40' y='8' width='8' height='8' fill='#e9d8c0'/><rect x='48' y='8' width='8' height='8' fill='#e9d8c0'/><rect x='56' y='8' width='8' height='8' fill='#e9d8c0'/><rect x='64' y='8' width='8' height='8' fill='#e9d8c0'/>
+      <rect x='24' y='16' width='8' height='8' fill='#e9d8c0'/><rect x='32' y='16' width='8' height='8' fill='#e9d8c0'/><rect x='40' y='16' width='8' height='8' fill='#e9d8c0'/><rect x='48' y='16' width='8' height='8' fill='#e9d8c0'/><rect x='56' y='16' width='8' height='8' fill='#e9d8c0'/><rect x='64' y='16' width='8' height='8' fill='#e9d8c0'/>
+      <rect x='44' y='2' width='8' height='8' fill='#f3c75e'/><rect x='28' y='40' width='40' height='72' fill='#b27e57'/><rect x='20' y='112' width='24' height='56' fill='#6c4731'/><rect x='52' y='112' width='24' height='56' fill='#6c4731'/>
+      <rect x='2' y='86' width='16' height='6' fill='#f5b764'/><rect x='88' y='86' width='16' height='6' fill='#f5b764'/>
+    </g>
+    <text x='24' y='322' class='name'>洪九掌柜（外门）</text>
+    <text x='24' y='356' class='desc'>爱好：酿酒 / 收古卷</text>
+  </g>
 </svg>

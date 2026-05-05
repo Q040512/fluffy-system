@@ -13,8 +13,8 @@
 ## 运行方式
 
 1. 安装 Godot 4.x。
-2. 用 Godot 导入当前目录 `c:\Users\30273\Desktop\game`。
-3. 打开后直接运行主场景 `res://scenes/main.tscn`。
+2. 用 Godot 导入仓库中的 `game/` 目录（例如当前仓库路径下的 `/workspace/fluffy-system/game`）。
+3. 打开后直接运行主场景 `res://scenes/main.tscn`（项目根在 `game/` 时该路径可直接使用）。
 
 ## 当前操作
 
