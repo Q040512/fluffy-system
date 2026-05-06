@@ -23,6 +23,7 @@ func _process(delta: float) -> void:
 	anim_time += delta
 	if game != null and Input.is_action_just_pressed("interact") and game.ui.is_dialogue_open():
 		game.advance_modal_dialogue()
+		z_index = 2 + int(position.y / 32.0)
 		queue_redraw()
 		return
 	var input_vector := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
@@ -42,10 +43,11 @@ func _process(delta: float) -> void:
 	else:
 		var idle_anim := "meditate" if _is_meditating_visual else "idle_%s" % direction_name
 		_play_state_animation(idle_anim)
-	if Input.is_action_just_pressed("interact"):
+	if game != null and Input.is_action_just_pressed("interact"):
 		game.try_interact(global_position + facing * 28.0)
-	if Input.is_action_just_pressed("meditate"):
+	if game != null and Input.is_action_just_pressed("meditate"):
 		game.meditate()
+	z_index = 2 + int(position.y / 32.0)
 	queue_redraw()
 
 func _draw() -> void:
